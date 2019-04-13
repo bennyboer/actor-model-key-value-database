@@ -19,4 +19,4 @@ log/*
 
 !log/.keepme
 
-.pb.go
+*.pb.go
