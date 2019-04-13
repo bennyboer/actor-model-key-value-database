@@ -1,12 +1,20 @@
 ## Ausführen ohne Docker
 
-### Go packages installieren
+### Einfach
+
+Für Windows wird die Datei `build.bat` ausgeführt, für Linux die `build.sh`.
+
+Die ausführbaren Dateien `tree-cli.exe` und `tree-service.exe` befindet sich dann im `bin` Ordner.
+
+### Detailliert
+
+#### Go packages installieren
 
 ```bash
 go get -t
 ```
 
-### Bauen der Messages (Google Protocol Buffers)
+#### Bauen der Messages (Google Protocol Buffers)
 
 Zuerst muss der Protocol Buffer Compiler installiert werden. 
 Für Windows uns Linux gibt es Binaries auf [GitHub](https://github.com/protocolbuffers/protobuf/releases/).
