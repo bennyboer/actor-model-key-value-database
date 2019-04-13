@@ -1,3 +1,20 @@
+## Ausführen ohne Docker
+
+### Go packages installieren
+
+```bash
+go get -t
+```
+
+### Bauen der Messages (Google Protocol Buffers)
+
+Zuerst muss der Protocol Buffer Compiler installiert werden. 
+Für Windows uns Linux gibt es Binaries auf [GitHub](https://github.com/protocolbuffers/protobuf/releases/).
+Alternativ kann man aber auch einen Paketmanager verwenden (z. B. Chocolatey für Windows mit `choco install protoc`).
+
+Im `messages` Ordner befindet sich eine `build.bat` (Windows) und eine `build.sh` (Linux) Datei, welche man **ausführen** kann um die Message Objekte zu kompilieren.
+
+
 ## Ausführen mit Docker
 
 -   Images bauen
