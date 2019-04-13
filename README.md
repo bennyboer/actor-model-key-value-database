@@ -1,3 +1,29 @@
+## Benutzung
+
+### CLI
+
+```
+tree-cli <flags...> [action] <arguments...>
+```
+
+> [action] muss vorhanden sein!
+
+#### Verfügbare Aktionen [action]
+| Aktion | Beschreibung | Beispiel |
+| --- | --- | --- |
+| `create-tree` | Erstellt einen neuen Baum, liefert die ID des neuen Baums und ein Sizungstoken, welcher benötigt wird um mit dem `tree-service` zu reden. | `tree-cli create-tree` |
+| `delete-tree` | Löscht einen Baum. Benötigt die ID des zu löschenden Baums und den dazugehörigen Token. | `tree-cli --id=42 --token=abc123 delete-tree` |
+| `insert` | Fügt ein neues Schlüssel-Wert Paar in einen Baum ein. Benötigt Baum ID und Token. | `tree-cli --id=42 --token=abc123 insert 6 "Hallo Welt"` |
+| `remove` | Löscht ein bestehendes Schlüssel-Wert Paar in einem Baum. Benötigt Baum ID und Token. | `tree-cli --id=42 --token=abc123 remove 6` |
+| `search` | Sucht ein bestehendes Schlüssel-Wert Paar in einem Baum. Benötigt Baum ID und Token. | `tree-cli --id=42 --token=abc123 search 6` |
+| `traverse` | Traversiert einen Baum. Benötigt Baum ID und Token. Liefert alle Schlüssel-Wert Paare im Baum in sortierter Reihenfolge. | `tree-cli --id=42 --token=abc123 traverse` |
+
+#### Verfügbare Flags <flag>
+| Flag | Beschreibung |
+| --- | --- |
+| `--id` | ID eines Baumes |
+| `--token` | Token eines Baumes |
+
 ## Ausführen ohne Docker
 
 ### Einfach
