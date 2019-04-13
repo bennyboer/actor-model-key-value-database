@@ -18,3 +18,5 @@
 log/*
 
 !log/.keepme
+
+.pb.go
