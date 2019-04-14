@@ -20,3 +20,5 @@ log/*
 !log/.keepme
 
 *.pb.go
+
+bin/

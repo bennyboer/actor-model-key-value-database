@@ -1,0 +1,13 @@
+syntax = "proto3";
+package messages;
+
+import "tree_identifier.proto";
+
+// Request to remove a key-value pair from a tree.
+message RemoveRequest {
+    // Identifier of the tree to remove key-value pair from.
+    TreeIdentifier treeId = 1;
+
+    // Key of the key-value pair to remove.
+    int32 key = 2;
+}

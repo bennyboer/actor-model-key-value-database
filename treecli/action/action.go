@@ -1,6 +1,9 @@
 package action
 
-import "github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
+import (
+	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
+	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
+)
 
 // Action executable with the CLI.
 type Action interface {
@@ -10,11 +13,12 @@ type Action interface {
 	Identifier() string
 
 	// Execute the action with the given flags and arguments.
-	Execute(args []string, flags *util.Flags) error
+	Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error
 }
 
 // All available command line actions.
 var Actions = []Action{
+	&List{},
 	&CreateTree{},
 	&DeleteTree{},
 	&Insert{},

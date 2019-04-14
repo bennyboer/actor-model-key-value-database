@@ -2,6 +2,7 @@ package action
 
 import (
 	"errors"
+	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
 )
@@ -13,7 +14,7 @@ func (DeleteTree) Identifier() string {
 	return deleteTree
 }
 
-func (DeleteTree) Execute(args []string, flags *util.Flags) error {
+func (DeleteTree) Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error {
 	log.Println("EXECUTE: Delete tree")
 
 	if flags.Id < 0 {

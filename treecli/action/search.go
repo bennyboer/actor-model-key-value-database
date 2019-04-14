@@ -3,6 +3,7 @@ package action
 import (
 	"errors"
 	"fmt"
+	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
 	"strconv"
@@ -15,7 +16,7 @@ func (Search) Identifier() string {
 	return search
 }
 
-func (Search) Execute(args []string, flags *util.Flags) error {
+func (Search) Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error {
 	log.Println("EXECUTE: Search key-value pair in tree")
 
 	if flags.Id < 0 {

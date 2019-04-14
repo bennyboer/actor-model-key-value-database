@@ -3,6 +3,7 @@ package action
 import (
 	"errors"
 	"fmt"
+	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
 	"strconv"
@@ -15,7 +16,7 @@ func (Remove) Identifier() string {
 	return remove
 }
 
-func (Remove) Execute(args []string, flags *util.Flags) error {
+func (Remove) Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error {
 	log.Println("EXECUTE: Remove key-value pair")
 
 	if flags.Id < 0 {

@@ -1,0 +1,11 @@
+syntax = "proto3";
+package messages;
+
+// Message identifying a tree.
+message TreeIdentifier {
+    // Id of the tree
+    int32 id = 1;
+
+    // Token used as "password" to access the tree
+    string token = 2;
+}

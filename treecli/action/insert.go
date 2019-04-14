@@ -3,6 +3,7 @@ package action
 import (
 	"errors"
 	"fmt"
+	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
 	"strconv"
@@ -16,7 +17,7 @@ func (Insert) Identifier() string {
 	return insert
 }
 
-func (Insert) Execute(args []string, flags *util.Flags) error {
+func (Insert) Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error {
 	log.Println("EXECUTE: Insert key-value pair")
 
 	if flags.Id < 0 {

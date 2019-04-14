@@ -1,0 +1,12 @@
+syntax = "proto3";
+package messages;
+
+// Reply of the tree deletion.
+message DeleteTreeReply {
+    // Whether the action was successful.
+    bool success = 1;
+
+    // Whether the tree has not been deleted, but marked for deletion.
+    // A second request will delete the tree for good.
+    bool markedForDeletion = 2;
+}

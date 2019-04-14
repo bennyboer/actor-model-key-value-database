@@ -1,0 +1,11 @@
+syntax = "proto3";
+package messages;
+
+// A simple key value pair.
+message KeyValuePair {
+    // Key of the pair.
+    int32 key = 1;
+
+    // Value of the pair.
+    string value = 2;
+}

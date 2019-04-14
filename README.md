@@ -1,6 +1,23 @@
 ## Benutzung
 
+> Vor dem Benutzen der Anwendung muss die Anwendung entweder mit Docker oder ohne Docker gebaut werden. Siehe spätere Abschnitte.
+
+### Service
+
+Um den Service zu starten, muss die Anwendung mit `tree-service <flags...>` gestartet werden.
+Als Flags kann die Adresse und der Port unter dem der Server laufen soll konfiguriert werden.
+
+#### Beispiel
+
+```
+tree-service --bind=":8090"
+```
+
+Der Service läuft dann unter `localhost:8090`.
+
 ### CLI
+
+> Vor der Benutzung des CLI muss der Service gestartet sein.
 
 ```
 tree-cli <flags...> [action] <arguments...>
@@ -11,6 +28,7 @@ tree-cli <flags...> [action] <arguments...>
 #### Verfügbare Aktionen [action]
 | Aktion | Beschreibung | Beispiel |
 | --- | --- | --- |
+| `list` | Listet alle vorhandenen Baum IDs auf. | `tree-cli trees` |
 | `create-tree` | Erstellt einen neuen Baum, liefert die ID des neuen Baums und ein Sizungstoken, welcher benötigt wird um mit dem `tree-service` zu reden. | `tree-cli create-tree` |
 | `delete-tree` | Löscht einen Baum. Benötigt die ID des zu löschenden Baums und den dazugehörigen Token. | `tree-cli --id=42 --token=abc123 delete-tree` |
 | `insert` | Fügt ein neues Schlüssel-Wert Paar in einen Baum ein. Benötigt Baum ID und Token. | `tree-cli --id=42 --token=abc123 insert 6 "Hallo Welt"` |
@@ -19,10 +37,11 @@ tree-cli <flags...> [action] <arguments...>
 | `traverse` | Traversiert einen Baum. Benötigt Baum ID und Token. Liefert alle Schlüssel-Wert Paare im Baum in sortierter Reihenfolge. | `tree-cli --id=42 --token=abc123 traverse` |
 
 #### Verfügbare Flags <flag>
-| Flag | Beschreibung |
-| --- | --- |
-| `--id` | ID eines Baumes |
-| `--token` | Token eines Baumes |
+| Flag | Beschreibung | Beispiel |
+| --- | --- | --- |
+| `--remote` | Adresse und Port des Services mit dem kommuniziert werden soll. | `--remote=":8090"` Service läuft unter localhost:8090 |
+| `--id` | ID eines Baumes | `--id=5` |
+| `--token` | Token eines Baumes | `--token="abc123"` |
 
 ## Ausführen ohne Docker
 

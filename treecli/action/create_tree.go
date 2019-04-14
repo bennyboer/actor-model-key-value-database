@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
 )
@@ -12,7 +13,7 @@ func (CreateTree) Identifier() string {
 	return createTree
 }
 
-func (CreateTree) Execute(args []string, flags *util.Flags) error {
+func (CreateTree) Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error {
 	log.Println("EXECUTE: Create tree")
 
 	// TODO

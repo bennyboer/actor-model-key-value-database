@@ -9,5 +9,5 @@ cd ./messages
 cd ..
 
 echo "Building binaries"
-go build -o bin/tree-cli.exe ./treecli/main.go
-go build -o bin/tree-service.exe ./treeservice/main.go
+go build -o bin/tree-cli.exe ./treecli
+go build -o bin/tree-service.exe ./treeservice

@@ -1,0 +1,41 @@
+syntax = "proto3";
+package messages;
+
+import "void.proto";
+import "tree_identifier.proto";
+import "delete_tree.proto";
+import "key_value_pair.proto";
+import "insert.proto";
+import "remove.proto";
+import "search.proto";
+
+// The tree service definition.
+service TreeService {
+    // List all trees.
+    rpc ListTrees (VoidMessage) returns (stream TreeIdentifier) {
+    }
+
+    // Create a tree.
+    rpc CreateTree (VoidMessage) returns (TreeIdentifier) {
+    }
+
+    // Delete a tree.
+    rpc DeleteTree (TreeIdentifier) returns (DeleteTreeReply) {
+    }
+
+    // Insert a key-value pair into a tree.
+    rpc Insert (InsertRequest) returns (VoidMessage) {
+    }
+
+    // Remove a key-value pair from a tree.
+    rpc Remove (RemoveRequest) returns (VoidMessage) {
+    }
+
+    // Search for a key-value pair in a tree.
+    rpc Search (SearchRequest) returns (SearchResponse) {
+    }
+
+    // Traverse the tree with the passed identifier.
+    rpc Traverse (TreeIdentifier) returns (stream KeyValuePair) {
+    }
+}
