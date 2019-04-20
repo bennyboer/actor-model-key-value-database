@@ -2,7 +2,7 @@ package tree
 
 import "github.com/AsynkronIT/protoactor-go/actor"
 
-type storage map[int]string
+type storage map[int32]string
 
 const CAPACITY int = 3
 
