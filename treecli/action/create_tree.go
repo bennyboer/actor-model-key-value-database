@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
@@ -13,10 +14,10 @@ func (CreateTree) Identifier() string {
 	return createTree
 }
 
-func (CreateTree) Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error {
+func (CreateTree) Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error {
 	log.Println("EXECUTE: Create tree")
 
-	// TODO
+	ctx.Request(remote, &messages.CreateTreeRequest{})
 
 	return nil
 }

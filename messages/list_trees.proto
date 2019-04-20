@@ -1,0 +1,13 @@
+syntax = "proto3";
+package messages;
+
+import "tree_identifier.proto";
+
+// Request to list all available trees.
+message ListTreesRequest {
+}
+
+// Response containing all available trees.
+message ListTreesResponse {
+    repeated TreeIdentifier treeIds = 1;
+}

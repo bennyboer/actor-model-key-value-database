@@ -1,0 +1,14 @@
+syntax = "proto3";
+package messages;
+
+import "tree_identifier.proto";
+
+// Request to create a new tree.
+message CreateTreeRequest {
+}
+
+// Response of the tree creation operation.
+message CreateTreeResponse {
+    // Id of the newly created tree.
+    TreeIdentifier treeId = 1;
+}

@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
+	"github.com/AsynkronIT/protoactor-go/actor"
+	"github.com/AsynkronIT/protoactor-go/remote"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/action"
+	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/local_messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
-	"google.golang.org/grpc"
 	"log"
 )
 
@@ -14,41 +15,40 @@ func main() {
 	arguments := util.GetProgramArguments()
 	flags := util.GetProgramFlags()
 
-	log.Printf("Args: %v\n", arguments)
-	log.Printf("Flags: %v\n", flags)
-
-	// Set up service connection
-	connection, err := grpc.Dial(fmt.Sprintf("%s:%d", flags.RemoteName, flags.RemotePort), grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("could not connect to service: %v", err)
-	}
-	defer connection.Close()
-
-	client := messages.NewTreeServiceClient(connection)
-
 	if len(arguments) == 0 {
 		printHelp()
 	} else {
-		// Create mapping of argument name to action.
-		actionMap := make(map[string]action.Action)
-		for _, a := range action.Actions {
-			actionMap[a.Identifier()] = a
-		}
+		result, err := process(arguments, flags).Result()
 
-		// Find the correct action to execute.
-		startArgument := arguments[0]
-		if startAction, ok := actionMap[startArgument]; ok {
-			// Found action -> Execute with remaining arguments and flags
-			if e := startAction.Execute(client, flags, arguments[1:]); e == nil {
-				log.Println("Success")
-			} else {
-				log.Fatalf("An error occurred :(\n%s", e.Error())
-			}
+		if err != nil {
+			log.Fatalf("Command execution failed:\n%s\n", err.Error())
 		} else {
-			log.Printf("Could not understand the argument \"%s\"", startArgument)
-			printHelp()
+			log.Printf("Command execution finished successfully:\n%v\n", result)
 		}
 	}
+}
+
+// Start the CLI actor and process the passed arguments and flags.
+func process(arguments []string, flags *util.Flags) *actor.Future {
+	remote.Start(fmt.Sprintf("%s:%d", flags.Name, flags.Port)) // Register as remote actor
+
+	actorProps := actor.PropsFromProducer(func() actor.Actor {
+		return NewCLIActor()
+	})
+
+	var rootContext = actor.EmptyRootContext
+	cliActor := rootContext.Spawn(actorProps)
+
+	future := rootContext.RequestFuture(
+		cliActor,
+		&local_messages.CLIExecuteRequest{
+			Arguments: arguments,
+			Flags:     flags,
+		},
+		flags.Timeout,
+	)
+
+	return future
 }
 
 func printHelp() {

@@ -12,3 +12,9 @@ message InsertRequest {
     // Key-value pair to insert into the tree.
     KeyValuePair entry = 2;
 }
+
+// Response of the insert operation.
+message InsertResponse {
+    // Whether the operation was successful.
+    bool success = 1;
+}
