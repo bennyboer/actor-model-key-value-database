@@ -41,9 +41,9 @@ func (node *Node) LeafBehavior(context actor.Context) {
 	case messages.SearchRequest:
 		if val, ok := (*node.values)[msg.Key]; ok {
 			var keyValue = messages.KeyValuePair{Key: msg.Key, Value: val}
-			context.Send(context.Sender(), messages.SearchResponse{Success: true, Entry: &keyValue})
+			context.Respond(messages.SearchResponse{Success: true, Entry: &keyValue})
 		} else {
-			context.Send(context.Sender(), messages.SearchResponse{Success: false, Entry: nil})
+			context.Respond(messages.SearchResponse{Success: false, Entry: nil})
 		}
 	case messages.RemoveRequest:
 		if _, ok := (*node.values)[msg.Key]; ok {
