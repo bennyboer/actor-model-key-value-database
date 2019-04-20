@@ -2,6 +2,7 @@ package action
 
 import (
 	"errors"
+	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
@@ -14,7 +15,7 @@ func (Traverse) Identifier() string {
 	return traverse
 }
 
-func (Traverse) Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error {
+func (Traverse) Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error {
 	log.Println("EXECUTE: Traverse tree")
 
 	if flags.Id < 0 {
@@ -24,7 +25,12 @@ func (Traverse) Execute(client messages.TreeServiceClient, flags *util.Flags, ar
 		return errors.New("please supply a valid Token")
 	}
 
-	// TODO
+	ctx.Request(remote, &messages.TraverseRequest{
+		TreeId: &messages.TreeIdentifier{
+			Id:    int32(flags.Id),
+			Token: flags.Token,
+		},
+	})
 
 	return nil
 }

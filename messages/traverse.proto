@@ -1,0 +1,17 @@
+syntax = "proto3";
+package messages;
+
+import "key_value_pair.proto";
+import "tree_identifier.proto";
+
+// Request of the traverse operation.
+message TraverseRequest {
+    // Id of the tree to traverse.
+    TreeIdentifier treeId = 1;
+}
+
+// Response of the traverse operation.
+message TraverseResponse {
+    // All key-value pairs in sorted order.
+    repeated KeyValuePair pairs = 1;
+}

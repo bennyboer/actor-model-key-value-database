@@ -1,7 +1,7 @@
 package action
 
 import (
-	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
+	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 )
 
@@ -13,7 +13,7 @@ type Action interface {
 	Identifier() string
 
 	// Execute the action with the given flags and arguments.
-	Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error
+	Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error
 }
 
 // All available command line actions.
