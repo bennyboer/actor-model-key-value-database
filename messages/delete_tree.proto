@@ -1,8 +1,16 @@
 syntax = "proto3";
 package messages;
 
-// Reply of the tree deletion.
-message DeleteTreeReply {
+import "tree_identifier.proto";
+
+// Request to delete a tree.
+message DeleteTreeRequest {
+    // Id of the tree to delete.
+    TreeIdentifier treeId = 1;
+}
+
+// Response of the tree deletion operation.
+message DeleteTreeResponse {
     // Whether the action was successful.
     bool success = 1;
 

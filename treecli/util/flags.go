@@ -7,13 +7,16 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
-	defaultName              = ""
-	defaultPort       uint16 = 8091
-	defaultRemoteName        = ""
-	defaultRemotePort uint16 = 8090
+	defaultName                   = ""
+	defaultPort            uint16 = 8091
+	defaultRemoteName             = ""
+	defaultRemotePort      uint16 = 8090
+	defaultTimeout                = time.Second * 5
+	defaultRemoteActorName        = "tree-service"
 )
 
 // Flags the CLI is able to understand.
@@ -35,6 +38,12 @@ type Flags struct {
 
 	// Port of the remove service to connect to
 	RemotePort uint16
+
+	// Name of the remote service actor
+	RemoteActorName string
+
+	// Timeout of the command execution
+	Timeout time.Duration
 }
 
 // Get all program flags received via command line.
@@ -60,6 +69,17 @@ func GetProgramFlags() *Flags {
 		fmt.Sprintf("%s:%d", defaultRemoteName, defaultRemotePort),
 		"the name and port of the service to connect to",
 	)
+	remoteActorName := flag.String(
+		"remote-name",
+		defaultRemoteActorName,
+		"the name of the tree service remote actor",
+	)
+
+	timeout := flag.Duration(
+		"timeout",
+		defaultTimeout,
+		"After what time the command execution will be cancelled",
+	)
 
 	flag.Parse()
 
@@ -76,12 +96,14 @@ func GetProgramFlags() *Flags {
 	}
 
 	return &Flags{
-		Token:      *token,
-		Id:         *id,
-		Name:       name,
-		Port:       port,
-		RemoteName: remoteName,
-		RemotePort: remotePort,
+		Token:           *token,
+		Id:              *id,
+		Name:            name,
+		Port:            port,
+		RemoteName:      remoteName,
+		RemotePort:      remotePort,
+		RemoteActorName: *remoteActorName,
+		Timeout:         *timeout,
 	}
 }
 

@@ -3,6 +3,7 @@ package action
 import (
 	"errors"
 	"fmt"
+	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
@@ -17,7 +18,7 @@ func (Insert) Identifier() string {
 	return insert
 }
 
-func (Insert) Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error {
+func (Insert) Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error {
 	log.Println("EXECUTE: Insert key-value pair")
 
 	if flags.Id < 0 {
@@ -31,7 +32,7 @@ func (Insert) Execute(client messages.TreeServiceClient, flags *util.Flags, args
 	}
 
 	// Parse key
-	key, e := strconv.ParseInt(args[0], 10, 64)
+	key, e := strconv.ParseInt(args[0], 10, 32)
 	if e != nil {
 		return errors.New(fmt.Sprintf("the key %s is not an integer", args[0]))
 	}
@@ -55,7 +56,16 @@ func (Insert) Execute(client messages.TreeServiceClient, flags *util.Flags, args
 
 	log.Printf("Key: %d, Value: %s\n", key, value)
 
-	// TODO
+	ctx.Request(remote, &messages.InsertRequest{
+		TreeId: &messages.TreeIdentifier{
+			Id:    int32(flags.Id),
+			Token: flags.Token,
+		},
+		Entry: &messages.KeyValuePair{
+			Key:   int32(key),
+			Value: value,
+		},
+	})
 
 	return nil
 }

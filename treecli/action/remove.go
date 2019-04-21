@@ -3,6 +3,7 @@ package action
 import (
 	"errors"
 	"fmt"
+	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
@@ -16,7 +17,7 @@ func (Remove) Identifier() string {
 	return remove
 }
 
-func (Remove) Execute(client messages.TreeServiceClient, flags *util.Flags, args []string) error {
+func (Remove) Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error {
 	log.Println("EXECUTE: Remove key-value pair")
 
 	if flags.Id < 0 {
@@ -30,14 +31,20 @@ func (Remove) Execute(client messages.TreeServiceClient, flags *util.Flags, args
 	}
 
 	// Parse key
-	key, e := strconv.ParseInt(args[0], 10, 64)
+	key, e := strconv.ParseInt(args[0], 10, 32)
 	if e != nil {
 		return errors.New(fmt.Sprintf("the key %s is not an integer", args[0]))
 	}
 
 	log.Printf("Key: %d\n", key)
 
-	// TODO
+	ctx.Request(remote, &messages.RemoveRequest{
+		TreeId: &messages.TreeIdentifier{
+			Id:    int32(flags.Id),
+			Token: flags.Token,
+		},
+		Key: int32(key),
+	})
 
 	return nil
 }

@@ -39,9 +39,12 @@ tree-cli <flags...> [action] <arguments...>
 #### Verfügbare Flags <flag>
 | Flag | Beschreibung | Beispiel |
 | --- | --- | --- |
+| `--bind` | Adresse und Port der CLI. | `--remote=":8091"` CLI läuft unter localhost:8091 |
 | `--remote` | Adresse und Port des Services mit dem kommuniziert werden soll. | `--remote=":8090"` Service läuft unter localhost:8090 |
+| `--remoteName` | Name des remote Actors des Services (Muss nicht angepasst werden, wenn der Service normal gestartet wird). | `--remote-name="tree-service"` |
 | `--id` | ID eines Baumes | `--id=5` |
 | `--token` | Token eines Baumes | `--token="abc123"` |
+| `--timeout` | Timeout für eine Operation | `--timeout=10s` |
 
 ## Ausführen ohne Docker
 
