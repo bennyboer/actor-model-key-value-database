@@ -45,8 +45,12 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			context.Respond(messages.SearchResponse{Success: false, Entry: nil})
 		}
 	case messages.RemoveRequest:
-		if _, ok := (*node.values)[msg.Key]; ok {
+		if val, ok := (*node.values)[msg.Key]; ok {
+			removed := messages.KeyValuePair{Key: msg.Key, Value: val}
 			delete(*node.values, msg.Key)
+			context.Respond(messages.RemoveResponse{Success: true, RemovedPair: &removed})
+		} else {
+			context.Respond(messages.RemoveResponse{Success: false, RemovedPair: nil})
 		}
 	case messages.InsertRequest:
 		if len(*node.values) < CAPACITY {
@@ -67,6 +71,7 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			// Leaf is now a node
 			node.behavior.Become(node.NodeBehavior)
 		}
+		context.Respond(messages.InsertResponse{Success: true})
 	}
 }
 
