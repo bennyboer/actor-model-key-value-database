@@ -3,15 +3,14 @@ package tree
 import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
+	"math"
 )
-
-const MinInt32 int32 = -2147483648
 
 func newNode() actor.Actor {
 	storage := make(storage, 3)
 	act := &Node{
 		values:    &storage,
-		searchkey: MinInt32,
+		searchkey: math.MinInt32,
 		left:      nil,
 		right:     nil,
 		behavior:  actor.NewBehavior(),
@@ -54,7 +53,7 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			(*node.values)[msg.Entry.Key] = msg.Entry.Value
 		} else {
 			context.Spawn(actor.PropsFromProducer(newNode))
-			node.searchkey = MinInt32
+			node.searchkey = math.MinInt32
 			for k, v := range *node.values {
 				var entry = messages.KeyValuePair{Key: k, Value: v}
 
