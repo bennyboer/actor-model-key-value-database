@@ -2,8 +2,18 @@ package tree
 
 import "github.com/AsynkronIT/protoactor-go/actor"
 
-type Node struct{}
+type storage map[int32]string
 
-func (n *Node) Receive(context actor.Context) {
-	// TODO
+const CAPACITY int = 3
+
+type Node struct {
+	left      *Node
+	right     *Node
+	searchkey int32
+	values    *storage
+	behavior  actor.Behavior
+}
+
+func (state *Node) Receive(context actor.Context) {
+	state.behavior.Receive(context)
 }

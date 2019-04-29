@@ -15,7 +15,7 @@ func GetProgramArguments() []string {
 		argument := parts[i]
 
 		if isArgument(&argument) {
-			arguments = append(arguments, argument);
+			arguments = append(arguments, argument)
 		}
 	}
 
