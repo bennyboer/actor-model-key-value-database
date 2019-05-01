@@ -8,6 +8,7 @@ import (
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/local_messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
+	"strings"
 )
 
 // Actor realizing the CLI.
@@ -41,7 +42,7 @@ func (a *CLIActor) ExecuteState(ctx actor.Context) {
 		log.Printf("Received CLI Execution Request: %v\n", msg)
 
 		a.sender = ctx.Sender()
-		a.executeCommand(ctx, msg.Arguments, msg.Flags)
+		a.executeCommand(ctx, msg.Arguments, msg.Flags, msg.RemotePID)
 		a.behavior.Become(a.ReplyState)
 	}
 }
@@ -50,9 +51,29 @@ func (a *CLIActor) ExecuteState(ctx actor.Context) {
 func (a *CLIActor) ReplyState(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *messages.ListTreesResponse:
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: fmt.Sprintf("%v", msg.TreeIds)})
+		var sb strings.Builder
+		sb.WriteString("Available Tree IDs:\n")
+
+		for _, idPtr := range msg.TreeIds {
+			id := *idPtr
+
+			sb.WriteString("  - ")
+			sb.WriteString(fmt.Sprintf("%d\n", id.Id))
+		}
+
+		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+			Message:  sb.String(),
+			Original: msg,
+		})
+
+		a.behavior.Become(a.ExecuteState)
 	case *messages.CreateTreeResponse:
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: fmt.Sprintf("%v", msg.TreeId)})
+		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+			Message:  fmt.Sprintf("Created tree with ID: %d and Token: '%s'\n", msg.TreeId.Id, msg.TreeId.Token),
+			Original: msg,
+		})
+
+		a.behavior.Become(a.ExecuteState)
 	case *messages.DeleteTreeResponse:
 		var message string
 
@@ -66,20 +87,43 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Tree could not be deleted."
 		}
 
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: message})
+		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+			Message:  message,
+			Original: msg,
+		})
+
+		a.behavior.Become(a.ExecuteState)
 	case *messages.InsertResponse:
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: fmt.Sprintf("%v", msg.Success)})
+		var message string
+		if msg.Success {
+			message = "Inserted successfully."
+		} else {
+			message = "Insert did not work."
+		}
+
+		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+			Message: message,
+			Original: msg,
+		})
+
+		a.behavior.Become(a.ExecuteState)
 	case *messages.SearchResponse:
 		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: fmt.Sprintf("%v", msg.Success)})
+
+		a.behavior.Become(a.ExecuteState)
 	case *messages.RemoveResponse:
 		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: fmt.Sprintf("%v", msg.Success)})
+
+		a.behavior.Become(a.ExecuteState)
 	case *messages.TraverseResponse:
 		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: fmt.Sprintf("%v", msg.Pairs)})
+
+		a.behavior.Become(a.ExecuteState)
 	}
 }
 
 // Execute the passed arguments and flags as command for the CLI.
-func (a *CLIActor) executeCommand(ctx actor.Context, arguments []string, flags *util.Flags) {
+func (a *CLIActor) executeCommand(ctx actor.Context, arguments []string, flags *util.Flags, remotePID *actor.PID) {
 	// Create mapping of argument name to action.
 	actionMap := make(map[string]action.Action)
 	for _, a := range action.Actions {
@@ -89,10 +133,8 @@ func (a *CLIActor) executeCommand(ctx actor.Context, arguments []string, flags *
 	// Find the correct action to execute.
 	startArgument := arguments[0]
 	if startAction, ok := actionMap[startArgument]; ok {
-		remote := actor.NewPID(fmt.Sprintf("%s:%d", flags.RemoteName, flags.RemotePort), flags.RemoteActorName)
-
 		// Found action -> Execute with remaining arguments and flags
-		if e := startAction.Execute(ctx, flags, arguments[1:], remote); e == nil {
+		if e := startAction.Execute(ctx, flags, arguments[1:], remotePID); e == nil {
 			log.Println("Successfully sent command to tree service")
 		} else {
 			log.Fatalf("An error occurred :(\n%s", e.Error())

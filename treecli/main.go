@@ -39,11 +39,14 @@ func process(arguments []string, flags *util.Flags) *actor.Future {
 	var rootContext = actor.EmptyRootContext
 	cliActor := rootContext.Spawn(actorProps)
 
+	remotePID := actor.NewPID(fmt.Sprintf("%s:%d", flags.RemoteName, flags.RemotePort), flags.RemoteActorName)
+
 	future := rootContext.RequestFuture(
 		cliActor,
 		&local_messages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     flags,
+			RemotePID: remotePID,
 		},
 		flags.Timeout,
 	)
