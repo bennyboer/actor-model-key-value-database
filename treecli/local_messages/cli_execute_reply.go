@@ -4,4 +4,7 @@ package local_messages
 type CLIExecuteReply struct {
 	// The result message
 	Message string
+
+	// The original result structure
+	Original interface{}
 }

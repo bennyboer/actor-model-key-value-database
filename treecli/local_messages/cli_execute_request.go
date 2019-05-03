@@ -2,6 +2,7 @@ package local_messages
 
 import (
 	"fmt"
+	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"strings"
 )
@@ -13,6 +14,9 @@ type CLIExecuteRequest struct {
 
 	// Flags to augment the execution behavior.
 	Flags *util.Flags
+
+	/// PID of the remote actor.
+	RemotePID *actor.PID
 }
 
 func (r *CLIExecuteRequest) String() string {
