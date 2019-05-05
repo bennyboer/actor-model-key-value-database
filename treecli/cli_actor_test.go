@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
+	act "github.com/ob-vss-ss19/blatt-3-sudo/treecli/action"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/local_messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"testing"
@@ -172,6 +173,26 @@ func TestCLIActor_ExecuteState_CreateTree(t *testing.T) {
 	}
 }
 
+func TestCLIActor_ExecuteState_DeleteTree_InvalidInput(t *testing.T) {
+	arguments := []string{}[:]
+	flags := util.Flags{
+		Id: -1,
+	}
+
+	action := act.DeleteTree{}
+	err := action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected to throw error because of negative tree id")
+	}
+
+	flags.Id = 123
+
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected to throw error because of missing tree token")
+	}
+}
+
 func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 	arguments := []string{
 		"delete-tree",
@@ -335,6 +356,64 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 	}
 }
 
+func TestCLIActor_ExecuteState_Insert_ValidateInput(t *testing.T) {
+	arguments := []string{}[:]
+	flags := util.Flags{
+		Id: -1,
+	}
+
+	// Test negative tree id
+	action := act.Insert{}
+	err := action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected action to throw an error because of a negative tree id")
+	}
+
+	// Test empty token
+	flags.Id = 1
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected action to throw an error because of an empty token")
+	}
+
+	// Test invalid argument count
+	flags.Token = "hw323"
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of insufficient length of the argument slice")
+	}
+
+	arguments = []string{
+		"1",
+	}[:]
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of insufficient length of the argument slice")
+	}
+
+	// Test non-integer key
+	arguments = []string{
+		"key",
+		"value",
+	}[:]
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of non-integer key")
+	}
+
+	// Test nil context
+	arguments = []string{
+		"1",
+		"\"Hello",
+		"World\"",
+	}[:]
+
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because context was nil")
+	}
+}
+
 func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 	arguments := []string{
 		"insert",
@@ -452,4 +531,512 @@ func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 	}
 }
 
+func TestCLIActor_ExecuteState_Remove_ValidateInputs(t *testing.T) {
+	arguments := []string{}[:]
+	flags := util.Flags{
+		Id: -1,
+	}
 
+	action := act.Remove{}
+
+	// Test negative tree id
+	err := action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of negative tree id")
+	}
+
+	// Test empty token
+	flags.Id = 123
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of empty tree token")
+	}
+
+	// Test correct arguments slice length
+	flags.Token = "abc123"
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of incorrect arguments length")
+	}
+
+	arguments = []string{
+		"argument1",
+		"argument2",
+	}[:]
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of incorrect arguments length")
+	}
+
+	// Test non-integer key
+	arguments = []string{
+		"key",
+	}[:]
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because 'key' is not an integer")
+	}
+}
+
+func TestCLIActor_ExecuteState_Remove(t *testing.T) {
+	arguments := []string{
+		"remove",
+		"434",
+	}
+	flags := util.Flags{
+		Id:      123,
+		Token:   "abc123",
+		Timeout: time.Second * 5,
+	}
+
+	rootContext := actor.EmptyRootContext
+
+	serviceProps := actor.PropsFromFunc(func(ctx actor.Context) {
+		switch msg := ctx.Message().(type) {
+		case *messages.RemoveRequest:
+			fmt.Printf("incoming message %v\n", msg)
+
+			success := true
+			if msg.Key != 1 {
+				success = false
+			}
+
+			var removedPair *messages.KeyValuePair = nil
+			if success {
+				removedPair = &messages.KeyValuePair{
+					Key:   1,
+					Value: "Hallo Welt",
+				}
+			}
+
+			ctx.Respond(&messages.RemoveResponse{
+				Success:     success,
+				RemovedPair: removedPair,
+			})
+		}
+	})
+
+	servicePID := rootContext.Spawn(serviceProps)
+
+	cliProps := actor.PropsFromProducer(func() actor.Actor {
+		return NewCLIActor()
+	})
+
+	cliPID := rootContext.Spawn(cliProps)
+
+	future := rootContext.RequestFuture(
+		cliPID,
+		&local_messages.CLIExecuteRequest{
+			Arguments: arguments,
+			Flags:     &flags,
+			RemotePID: servicePID,
+		},
+		flags.Timeout,
+	)
+
+	result, err := future.Result()
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	response, ok := result.(local_messages.CLIExecuteReply)
+	if !ok {
+		t.Errorf("expected response to be of type CLIExecuteReply")
+	}
+
+	expectedResultMessage := "Could not remove key-value pair."
+
+	if response.Message != expectedResultMessage {
+		t.Errorf("expected message '%s'; got '%s'", expectedResultMessage, response.Message)
+	}
+
+	original, ok := response.Original.(*messages.RemoveResponse)
+	if !ok {
+		t.Errorf("expected original response to be of type RemoveResponse")
+	}
+
+	if original.Success != false {
+		t.Errorf("expected original response to be unsuccessful")
+	}
+
+	if original.RemovedPair != nil {
+		t.Errorf("expected original response to have nil pointer as removed pair")
+	}
+
+	// Test successful delete
+	arguments = []string{
+		"remove",
+		"1",
+	}
+
+	future = rootContext.RequestFuture(
+		cliPID,
+		&local_messages.CLIExecuteRequest{
+			Arguments: arguments,
+			Flags:     &flags,
+			RemotePID: servicePID,
+		},
+		flags.Timeout,
+	)
+
+	result, err = future.Result()
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	response, ok = result.(local_messages.CLIExecuteReply)
+	if !ok {
+		t.Errorf("expected response to be of type CLIExecuteReply")
+	}
+
+	expectedResultMessage = "Removed key-value pair with Key: 1 and Value 'Hallo Welt'."
+
+	if response.Message != expectedResultMessage {
+		t.Errorf("expected message '%s'; got '%s'", expectedResultMessage, response.Message)
+	}
+
+	original, ok = response.Original.(*messages.RemoveResponse)
+	if !ok {
+		t.Errorf("expected original response to be of type RemoveResponse")
+	}
+
+	if original.Success != true {
+		t.Errorf("expected original response to be successful")
+	}
+
+	if original.RemovedPair == nil || original.RemovedPair.Key != 1 || original.RemovedPair.Value != "Hallo Welt" {
+		t.Errorf("expected original response to have a removed pair with key: 1 and value: 'Hallo Welt'")
+	}
+}
+
+func TestCLIActor_ExecuteState_Search(t *testing.T) {
+	arguments := []string{
+		"search",
+		"345",
+	}
+	flags := util.Flags{
+		Id:      123,
+		Token:   "abc123",
+		Timeout: time.Second * 5,
+	}
+
+	rootContext := actor.EmptyRootContext
+
+	serviceProps := actor.PropsFromFunc(func(ctx actor.Context) {
+		switch msg := ctx.Message().(type) {
+		case *messages.SearchRequest:
+			fmt.Printf("incoming message %v\n", msg)
+
+			success := true
+			if msg.Key != 1 {
+				success = false
+			}
+
+			var pair *messages.KeyValuePair = nil
+			if success {
+				pair = &messages.KeyValuePair{
+					Key:   1,
+					Value: "Hallo Welt",
+				}
+			}
+
+			ctx.Respond(&messages.SearchResponse{
+				Success: success,
+				Entry:   pair,
+			})
+		}
+	})
+
+	servicePID := rootContext.Spawn(serviceProps)
+
+	cliProps := actor.PropsFromProducer(func() actor.Actor {
+		return NewCLIActor()
+	})
+
+	cliPID := rootContext.Spawn(cliProps)
+
+	future := rootContext.RequestFuture(
+		cliPID,
+		&local_messages.CLIExecuteRequest{
+			Arguments: arguments,
+			Flags:     &flags,
+			RemotePID: servicePID,
+		},
+		flags.Timeout,
+	)
+
+	result, err := future.Result()
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	response, ok := result.(local_messages.CLIExecuteReply)
+	if !ok {
+		t.Errorf("expected response to be of type CLIExecuteReply")
+	}
+
+	expectedResultMessage := "Could not find key-value pair."
+
+	if response.Message != expectedResultMessage {
+		t.Errorf("expected message '%s'; got '%s'", expectedResultMessage, response.Message)
+	}
+
+	original, ok := response.Original.(*messages.SearchResponse)
+	if !ok {
+		t.Errorf("expected original response to be of type SearchResponse")
+	}
+
+	if original.Success != false {
+		t.Errorf("expected original response to be unsuccessful")
+	}
+
+	if original.Entry != nil {
+		t.Errorf("expected original response to have nil pointer as found pair")
+	}
+
+	// Test successful search
+	arguments = []string{
+		"search",
+		"1",
+	}
+
+	future = rootContext.RequestFuture(
+		cliPID,
+		&local_messages.CLIExecuteRequest{
+			Arguments: arguments,
+			Flags:     &flags,
+			RemotePID: servicePID,
+		},
+		flags.Timeout,
+	)
+
+	result, err = future.Result()
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	response, ok = result.(local_messages.CLIExecuteReply)
+	if !ok {
+		t.Errorf("expected response to be of type CLIExecuteReply")
+	}
+
+	expectedResultMessage = "Found key-value pair with Key: 1 and Value 'Hallo Welt'."
+
+	if response.Message != expectedResultMessage {
+		t.Errorf("expected message '%s'; got '%s'", expectedResultMessage, response.Message)
+	}
+
+	original, ok = response.Original.(*messages.SearchResponse)
+	if !ok {
+		t.Errorf("expected original response to be of type SearchResponse")
+	}
+
+	if original.Success != true {
+		t.Errorf("expected original response to be successful")
+	}
+
+	if original.Entry == nil || original.Entry.Key != 1 || original.Entry.Value != "Hallo Welt" {
+		t.Errorf("expected original response to have a found pair with key: 1 and value: 'Hallo Welt'")
+	}
+}
+
+func TestCLIActor_ExecuteState_Search_ValidateInputs(t *testing.T) {
+	arguments := []string{}[:]
+	flags := util.Flags{
+		Id: -1,
+	}
+
+	action := act.Search{}
+
+	// Test negative tree id
+	err := action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of negative tree id")
+	}
+
+	// Test empty token
+	flags.Id = 123
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of empty tree token")
+	}
+
+	// Test correct arguments slice length
+	flags.Token = "abc123"
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of incorrect arguments length")
+	}
+
+	arguments = []string{
+		"argument1",
+		"argument2",
+	}[:]
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of incorrect arguments length")
+	}
+
+	// Test non-integer key
+	arguments = []string{
+		"key",
+	}[:]
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because 'key' is not an integer")
+	}
+}
+
+func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
+	arguments := []string{
+		"traverse",
+	}
+	flags := util.Flags{
+		Id:      124,
+		Token:   "abc123",
+		Timeout: time.Second * 5,
+	}
+
+	rootContext := actor.EmptyRootContext
+
+	serviceProps := actor.PropsFromFunc(func(ctx actor.Context) {
+		switch msg := ctx.Message().(type) {
+		case *messages.TraverseRequest:
+			fmt.Printf("incoming message %v\n", msg)
+
+			if msg.TreeId.Id == 123 {
+				ctx.Respond(&messages.TraverseResponse{
+					Pairs: []*messages.KeyValuePair{
+						&messages.KeyValuePair{
+							Key:   1,
+							Value: "Key 1",
+						},
+						&messages.KeyValuePair{
+							Key:   2,
+							Value: "Key 2",
+						},
+						&messages.KeyValuePair{
+							Key:   3,
+							Value: "Key 3",
+						},
+					}[:],
+				})
+			} else {
+				ctx.Respond(&messages.TraverseResponse{
+					Pairs: nil,
+				})
+			}
+		}
+	})
+
+	servicePID := rootContext.Spawn(serviceProps)
+
+	cliProps := actor.PropsFromProducer(func() actor.Actor {
+		return NewCLIActor()
+	})
+
+	cliPID := rootContext.Spawn(cliProps)
+
+	future := rootContext.RequestFuture(
+		cliPID,
+		&local_messages.CLIExecuteRequest{
+			Arguments: arguments,
+			Flags:     &flags,
+			RemotePID: servicePID,
+		},
+		flags.Timeout,
+	)
+
+	result, err := future.Result()
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	response, ok := result.(local_messages.CLIExecuteReply)
+	if !ok {
+		t.Errorf("expected response to be of type CLIExecuteReply")
+	}
+
+	expectedResultMessage := "Could not traverse tree."
+
+	if response.Message != expectedResultMessage {
+		t.Errorf("expected message '%s'; got '%s'", expectedResultMessage, response.Message)
+	}
+
+	original, ok := response.Original.(*messages.TraverseResponse)
+	if !ok {
+		t.Errorf("expected original response to be of type TraverseResponse")
+	}
+
+	if original.Pairs != nil {
+		t.Errorf("expected original response to have no pairs")
+	}
+
+	// Test successful traverse
+	flags.Id = 123
+
+	future = rootContext.RequestFuture(
+		cliPID,
+		&local_messages.CLIExecuteRequest{
+			Arguments: arguments,
+			Flags:     &flags,
+			RemotePID: servicePID,
+		},
+		flags.Timeout,
+	)
+
+	result, err = future.Result()
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	response, ok = result.(local_messages.CLIExecuteReply)
+	if !ok {
+		t.Errorf("expected response to be of type CLIExecuteReply")
+	}
+
+	expectedResultMessage = `All key-value pairs:
+  - Key: 1, Value: 'Key 1'
+  - Key: 2, Value: 'Key 2'
+  - Key: 3, Value: 'Key 3'
+`
+
+	if response.Message != expectedResultMessage {
+		t.Errorf("expected message '%s'; got '%s'", expectedResultMessage, response.Message)
+	}
+
+	original, ok = response.Original.(*messages.TraverseResponse)
+	if !ok {
+		t.Errorf("expected original response to be of type TraverseResponse")
+	}
+
+	if original.Pairs == nil {
+		t.Errorf("expected original response to have pairs")
+	}
+
+	if len(original.Pairs) != 3 {
+		t.Errorf("expected original response to have 3 pairs as result")
+	}
+}
+
+func TestCLIActor_ExecuteState_Traverse_ValidateInputs(t *testing.T) {
+	arguments := []string{}[:]
+	flags := util.Flags{
+		Id: -1,
+	}
+
+	action := act.Traverse{}
+
+	// Test negative tree id
+	err := action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of negative tree id")
+	}
+
+	// Test empty token
+	flags.Id = 123
+	err = action.Execute(nil, &flags, arguments, nil)
+	if err == nil {
+		t.Errorf("expected error because of empty tree token")
+	}
+}

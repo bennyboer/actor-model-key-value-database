@@ -56,6 +56,10 @@ func (Insert) Execute(ctx actor.Context, flags *util.Flags, args []string, remot
 
 	log.Printf("Key: %d, Value: %s\n", key, value)
 
+	if ctx == nil {
+		return errors.New(fmt.Sprintf("the supplied context mustn't be nil"))
+	}
+
 	ctx.Request(remote, &messages.InsertRequest{
 		TreeId: &messages.TreeIdentifier{
 			Id:    int32(flags.Id),

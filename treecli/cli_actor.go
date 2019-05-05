@@ -102,21 +102,60 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 		}
 
 		ctx.Send(a.sender, local_messages.CLIExecuteReply{
-			Message: message,
+			Message:  message,
 			Original: msg,
 		})
 
 		a.behavior.Become(a.ExecuteState)
 	case *messages.SearchResponse:
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: fmt.Sprintf("%v", msg.Success)})
+		var message string
+		if msg.Success {
+			message = fmt.Sprintf("Found key-value pair with Key: %d and Value '%s'.", msg.Entry.Key, msg.Entry.Value)
+		} else {
+			message = "Could not find key-value pair."
+		}
+
+		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+			Message:  message,
+			Original: msg,
+		})
 
 		a.behavior.Become(a.ExecuteState)
 	case *messages.RemoveResponse:
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: fmt.Sprintf("%v", msg.Success)})
+		var message string
+		if msg.Success {
+			message = fmt.Sprintf("Removed key-value pair with Key: %d and Value '%s'.", msg.RemovedPair.Key, msg.RemovedPair.Value)
+		} else {
+			message = "Could not remove key-value pair."
+		}
+
+		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+			Message:  message,
+			Original: msg,
+		})
 
 		a.behavior.Become(a.ExecuteState)
 	case *messages.TraverseResponse:
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{Message: fmt.Sprintf("%v", msg.Pairs)})
+		var message string
+		if msg.Pairs != nil {
+			var sb strings.Builder
+
+			sb.WriteString("All key-value pairs:\n")
+
+			for _, pairPtr := range msg.Pairs {
+				pair := *pairPtr
+				sb.WriteString(fmt.Sprintf("  - Key: %d, Value: '%s'\n", pair.Key, pair.Value))
+			}
+
+			message = sb.String()
+		} else {
+			message = "Could not traverse tree."
+		}
+
+		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+			Message:  message,
+			Original: msg,
+		})
 
 		a.behavior.Become(a.ExecuteState)
 	}
