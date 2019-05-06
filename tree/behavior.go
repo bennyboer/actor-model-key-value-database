@@ -4,15 +4,14 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"math"
+	"os"
 )
 
-func newNode() actor.Actor {
+func NewNode() actor.Actor {
 	storage := make(storage, 3)
 	act := &Node{
 		values:    &storage,
 		searchkey: math.MinInt32,
-		left:      nil,
-		right:     nil,
 		behavior:  actor.NewBehavior(),
 	}
 	act.behavior.Become(act.LeafBehavior)
@@ -56,7 +55,7 @@ func (node *Node) LeafBehavior(context actor.Context) {
 		if len(*node.values) < CAPACITY {
 			(*node.values)[msg.Entry.Key] = msg.Entry.Value
 		} else {
-			context.Spawn(actor.PropsFromProducer(newNode))
+			context.Spawn(actor.PropsFromProducer(NewNode))
 			node.searchkey = math.MinInt32
 			for k, v := range *node.values {
 				var entry = messages.KeyValuePair{Key: k, Value: v}
@@ -72,6 +71,8 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			node.behavior.Become(node.NodeBehavior)
 		}
 		context.Respond(messages.InsertResponse{Success: true})
+	case messages.DeleteTreeRequest:
+		os.Exit(0)
 	}
 }
 
@@ -79,24 +80,30 @@ func (node *Node) NodeBehavior(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case messages.SearchRequest:
 		node.forwardKeyedMessage(context, msg.Key)
+
 	case messages.InsertRequest:
 		var address *actor.PID
 		if node.searchkey <= msg.Entry.Key {
 			if len(context.Children()) > 1 {
 				address = context.Children()[1]
 			} else {
-				address = context.Spawn(actor.PropsFromProducer(newNode))
+				address = context.Spawn(actor.PropsFromProducer(NewNode))
 			}
 		} else {
 			if len(context.Children()) > 0 {
 				address = context.Children()[0]
 			} else {
-				address = context.Spawn(actor.PropsFromProducer(newNode))
+				address = context.Spawn(actor.PropsFromProducer(NewNode))
 			}
 		}
 		context.Forward(address)
 	case messages.RemoveRequest:
 		node.forwardKeyedMessage(context, msg.Key)
 		// TODO DeleteTree
+	case messages.DeleteTreeRequest:
+		for _, child := range(context.Children()) {
+			context.Forward(child)
+		}
+		os.Exit(0)
 	}
 }
