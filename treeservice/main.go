@@ -59,7 +59,7 @@ func rootBehavior(ctx actor.Context) {
 	var root = getRoot()
 
 	switch msg := ctx.Message().(type) {
-	case messages.CreateTreeRequest:
+	case *messages.CreateTreeRequest:
 		log.Printf("Create Tree Request incoming! %v\n", msg)
 		pid := ctx.Spawn(actor.PropsFromProducer(tree.NewNode))
 		token := RandStringRunes(5)
@@ -75,7 +75,13 @@ func rootBehavior(ctx actor.Context) {
 
 		root.idToData[id] = TreeData{token: token, pid: pid, marked: false}
 
-	case messages.ListTreesRequest:
+		ctx.Respond(&messages.CreateTreeResponse{
+			TreeId: &messages.TreeIdentifier{
+				Id:    id,
+				Token: token,
+			},
+		})
+	case *messages.ListTreesRequest:
 		log.Printf("List Trees Request incoming! %v\n", msg)
 		var results = make([]*messages.TreeIdentifier, len(root.trees))
 
@@ -113,19 +119,19 @@ func rootBehavior(ctx actor.Context) {
 		} else {
 			log.Printf("Token is wrong!\n")
 		}
-	case messages.InsertRequest:
+	case *messages.InsertRequest:
 		log.Printf("Insert Request incoming %v ", msg)
 		forward(ctx, root, msg.TreeId)
 
-	case messages.SearchRequest:
+	case *messages.SearchRequest:
 		log.Printf("Search Request incoming %v ", msg)
 		forward(ctx, root, msg.TreeId)
 
-	case messages.RemoveRequest:
+	case *messages.RemoveRequest:
 		log.Printf("Remove Request incoming %v ", msg)
 		forward(ctx, root, msg.TreeId)
 
-	case messages.TraverseRequest:
+	case *messages.TraverseRequest:
 		log.Printf("Traverse Request incoming %v ", msg)
 		forward(ctx, root, msg.TreeId)
 	}
