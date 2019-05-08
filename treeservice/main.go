@@ -33,14 +33,14 @@ type TreeData struct {
 type RootActor struct {
 	idToData map[int32]TreeData
 	trees    []int32
-	lastIns  int
+	lastIns  int32
 }
 
 func getRoot() *RootActor {
 	if root == nil {
 		root = &RootActor{
 			idToData: make(map[int32]TreeData),
-			trees:    make([]int32, 2),
+			trees:    make([]int32, 0),
 		}
 	}
 	return root
@@ -64,14 +64,9 @@ func rootBehavior(ctx actor.Context) {
 		pid := ctx.Spawn(actor.PropsFromProducer(tree.NewNode))
 		token := RandStringRunes(5)
 
-		var id int32
-		if root.lastIns == 0 {
-			id = 1
-		} else {
-			id = root.trees[root.lastIns] + 1
-			root.lastIns++
-		}
-		root.trees[root.lastIns] = id
+		id := root.lastIns + 1
+		root.trees = append(root.trees, id)
+		root.lastIns++
 
 		root.idToData[id] = TreeData{token: token, pid: pid, marked: false}
 
@@ -85,11 +80,15 @@ func rootBehavior(ctx actor.Context) {
 		log.Printf("List Trees Request incoming! %v\n", msg)
 		var results = make([]*messages.TreeIdentifier, len(root.trees))
 
-		for _, id := range root.trees {
-			results = append(results, &messages.TreeIdentifier{
-				Id:    id,
-				Token: root.idToData[id].token,
-			})
+		for i, id := range root.trees {
+			if id != 0 {
+				if _, ok := root.idToData[id]; ok {
+					results[i] = &messages.TreeIdentifier{
+						Id:    id,
+						Token: root.idToData[id].token,
+					}
+				}
+			}
 		}
 
 		ctx.Respond(&messages.ListTreesResponse{
