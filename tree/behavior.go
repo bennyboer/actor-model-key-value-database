@@ -36,14 +36,14 @@ func (node *Node) forwardKeyedMessage(context actor.Context, key int32) {
 
 func (node *Node) LeafBehavior(context actor.Context) {
 	switch msg := context.Message().(type) {
-	case messages.SearchRequest:
+	case *messages.SearchRequest:
 		if val, ok := (*node.values)[msg.Key]; ok {
 			var keyValue = messages.KeyValuePair{Key: msg.Key, Value: val}
 			context.Respond(messages.SearchResponse{Success: true, Entry: &keyValue})
 		} else {
 			context.Respond(messages.SearchResponse{Success: false, Entry: nil})
 		}
-	case messages.RemoveRequest:
+	case *messages.RemoveRequest:
 		if val, ok := (*node.values)[msg.Key]; ok {
 			removed := messages.KeyValuePair{Key: msg.Key, Value: val}
 			delete(*node.values, msg.Key)
@@ -51,7 +51,7 @@ func (node *Node) LeafBehavior(context actor.Context) {
 		} else {
 			context.Respond(messages.RemoveResponse{Success: false, RemovedPair: nil})
 		}
-	case messages.InsertRequest:
+	case *messages.InsertRequest:
 		if len(*node.values) < CAPACITY {
 			(*node.values)[msg.Entry.Key] = msg.Entry.Value
 		} else {
@@ -71,17 +71,17 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			node.behavior.Become(node.NodeBehavior)
 		}
 		context.Respond(messages.InsertResponse{Success: true})
-	case messages.DeleteTreeRequest:
+	case *messages.DeleteTreeRequest:
 		os.Exit(0)
 	}
 }
 
 func (node *Node) NodeBehavior(context actor.Context) {
 	switch msg := context.Message().(type) {
-	case messages.SearchRequest:
+	case *messages.SearchRequest:
 		node.forwardKeyedMessage(context, msg.Key)
 
-	case messages.InsertRequest:
+	case *messages.InsertRequest:
 		var address *actor.PID
 		if node.searchkey <= msg.Entry.Key {
 			if len(context.Children()) > 1 {
@@ -97,11 +97,11 @@ func (node *Node) NodeBehavior(context actor.Context) {
 			}
 		}
 		context.Forward(address)
-	case messages.RemoveRequest:
+	case *messages.RemoveRequest:
 		node.forwardKeyedMessage(context, msg.Key)
 		// TODO DeleteTree
-	case messages.DeleteTreeRequest:
-		for _, child := range(context.Children()) {
+	case *messages.DeleteTreeRequest:
+		for _, child := range context.Children() {
 			context.Forward(child)
 		}
 		os.Exit(0)
