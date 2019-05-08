@@ -155,6 +155,7 @@ func TestService_CreateTree(t *testing.T) {
 	servicePID := rootContext.Spawn(getTreeServiceProps())
 
 	createTree(t, rootContext, servicePID)
+	root = nil // Well, if it works it ain't stupid
 }
 
 func TestService_ListTrees(t *testing.T) {
@@ -178,6 +179,7 @@ func TestService_ListTrees(t *testing.T) {
 			t.Errorf("tree token mustn't be revealed by the action! It is a secret!")
 		}
 	}
+	root = nil
 }
 
 func TestService_DeleteTree(t *testing.T) {
@@ -247,6 +249,7 @@ func TestService_DeleteTree(t *testing.T) {
 			t.Errorf("this tree should have been deleted by now")
 		}
 	}
+	root = nil
 }
 
 func TestService_InsertKeyValuePair(t *testing.T) {

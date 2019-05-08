@@ -78,15 +78,15 @@ func rootBehavior(ctx actor.Context) {
 		})
 	case *messages.ListTreesRequest:
 		log.Printf("List Trees Request incoming! %v\n", msg)
-		var results = make([]*messages.TreeIdentifier, len(root.trees))
+		var results = make([]*messages.TreeIdentifier, 0, len(root.trees))
 
-		for i, id := range root.trees {
+		for _, id := range root.trees {
 			if id != 0 {
 				if _, ok := root.idToData[id]; ok {
-					results[i] = &messages.TreeIdentifier{
+					results = append(results, &messages.TreeIdentifier{
 						Id:    id,
-						Token: root.idToData[id].token,
-					}
+						Token: "",
+					})
 				}
 			}
 		}
