@@ -4,7 +4,6 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"math"
-	"os"
 )
 
 func NewNode() actor.Actor {
@@ -71,8 +70,6 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			node.behavior.Become(node.NodeBehavior)
 		}
 		context.Respond(messages.InsertResponse{Success: true})
-	case *messages.DeleteTreeRequest:
-		os.Exit(0)
 	}
 }
 
@@ -99,11 +96,9 @@ func (node *Node) NodeBehavior(context actor.Context) {
 		context.Forward(address)
 	case *messages.RemoveRequest:
 		node.forwardKeyedMessage(context, msg.Key)
-		// TODO DeleteTree
 	case *messages.DeleteTreeRequest:
 		for _, child := range context.Children() {
-			context.Forward(child)
+			child.Poison()
 		}
-		os.Exit(0)
 	}
 }

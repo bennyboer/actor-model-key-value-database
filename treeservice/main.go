@@ -98,6 +98,7 @@ func (root *RootActor) rootBehavior(ctx actor.Context) {
 					MarkedForDeletion: false,
 				})
 				ctx.Forward(root.idToData[msg.TreeId.Id].pid)
+				root.idToData[msg.TreeId.Id].pid.Poison()
 				delete(root.idToData, msg.TreeId.Id)
 
 			} else {
