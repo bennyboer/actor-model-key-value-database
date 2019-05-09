@@ -14,7 +14,6 @@ import (
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
-var root *RootActor = nil
 
 func RandStringRunes(n int) string {
 	b := make([]rune, n)
@@ -34,29 +33,25 @@ type RootActor struct {
 	idToData map[int32]TreeData
 	trees    []int32
 	lastIns  int32
+	behavior actor.Behavior
 }
 
-func getRoot() *RootActor {
-	if root == nil {
-		root = &RootActor{
-			idToData: make(map[int32]TreeData),
-			trees:    make([]int32, 0),
-		}
+func newRoot() *RootActor {
+	actor := &RootActor{
+		idToData: make(map[int32]TreeData),
+		trees:    make([]int32, 0),
+		behavior: actor.NewBehavior(),
 	}
-	return root
+	actor.behavior.Become(actor.rootBehavior)
+
+	return actor
 }
 
-func forward(ctx actor.Context, root *RootActor, data *messages.TreeIdentifier) {
-	if root.idToData[data.Id].token == data.Token {
-		ctx.Forward(root.idToData[data.Id].pid)
-		log.Printf("\n")
-	} else {
-		log.Printf("Wrong token!\n")
-	}
+func (root *RootActor) Receive(ctx actor.Context) {
+	root.behavior.Receive(ctx)
 }
 
-func rootBehavior(ctx actor.Context) {
-	var root = getRoot()
+func (root *RootActor) rootBehavior(ctx actor.Context) {
 
 	switch msg := ctx.Message().(type) {
 	case *messages.CreateTreeRequest:
@@ -136,6 +131,15 @@ func rootBehavior(ctx actor.Context) {
 	}
 }
 
+func forward(ctx actor.Context, root *RootActor, data *messages.TreeIdentifier) {
+	if root.idToData[data.Id].token == data.Token {
+		ctx.Forward(root.idToData[data.Id].pid)
+		log.Printf("\n")
+	} else {
+		log.Printf("Wrong token!\n")
+	}
+}
+
 func main() {
 	printHeader()
 
@@ -157,7 +161,10 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	var rootContext = actor.EmptyRootContext
-	props := actor.PropsFromFunc(rootBehavior)
+	props := actor.PropsFromProducer(func() actor.Actor {
+		return newRoot()
+	})
+
 	serverPID, err := rootContext.SpawnNamed(props, *actorName)
 	if err != nil {
 		log.Fatalf("Could not create root actor")
