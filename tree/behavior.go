@@ -3,11 +3,13 @@ package tree
 import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
+	"log"
 	"math"
+	"sort"
 )
 
 func NewNode() actor.Actor {
-	storage := make(storage, 3)
+	storage := make(storage, 4)
 	act := &Node{
 		values:    &storage,
 		searchkey: math.MinInt32,
@@ -53,23 +55,54 @@ func (node *Node) LeafBehavior(context actor.Context) {
 	case *messages.InsertRequest:
 		if len(*node.values) < CAPACITY {
 			(*node.values)[msg.Entry.Key] = msg.Entry.Value
+			log.Printf("[Node] Inserted %d with %v", msg.Entry.Key, msg.Entry.Value)
 		} else {
+			// Spawn both children
 			context.Spawn(actor.PropsFromProducer(NewNode))
-			node.searchkey = math.MinInt32
-			for k, v := range *node.values {
-				var entry = messages.KeyValuePair{Key: k, Value: v}
+			context.Spawn(actor.PropsFromProducer(NewNode))
+			(*node.values)[msg.Entry.Key] = msg.Entry.Value
+			var keys = make([]int32, 0, 4)
 
-				if k > node.searchkey {
-					node.searchkey = k
+			for k := range *node.values {
+				keys = append(keys, k)
+			}
+
+			sort.Slice(keys, func(i, j int) bool {
+				return keys[i] < keys[j]
+			})
+			node.searchkey = keys[2]
+
+			for i, k := range keys {
+				var entry = messages.KeyValuePair{Key: k, Value: (*node.values)[k]}
+				var index = 0
+				if i >= (CAPACITY+1)/2 {
+					index = 1
 				}
-
-				context.Send(context.Children()[0], messages.InsertRequest{Entry: &entry, TreeId: msg.TreeId})
+				context.Send(context.Children()[index], &messages.InsertRequest{Entry: &entry, TreeId: msg.TreeId})
 			}
 			(*node).values = nil
 			// Leaf is now a node
 			node.behavior.Become(node.NodeBehavior)
+			log.Printf("[Node] Leaf is now a node")
 		}
 		context.Respond(&messages.InsertResponse{Success: true})
+	case *messages.TraverseRequest:
+		var pairs = make([]*messages.KeyValuePair, 0, 3)
+		var keys = make([]int32, 0, 3)
+
+		for k := range *(node.values) {
+			keys = append(keys, k)
+		}
+
+		sort.Slice(keys, func(i, j int) bool {
+			return keys[i] < keys[j]
+		})
+
+		for _, i := range keys {
+			pairs = append(pairs, &messages.KeyValuePair{Key: i, Value: (*node.values)[i]})
+		}
+
+		context.Respond(&messages.TraverseResponse{Pairs: pairs})
 	}
 }
 
@@ -100,5 +133,17 @@ func (node *Node) NodeBehavior(context actor.Context) {
 		for _, child := range context.Children() {
 			child.Poison()
 		}
+	case *messages.TraverseRequest:
+		var pairs = make([]*messages.KeyValuePair, 0, 3)
+		for _, child := range context.Children() {
+			result, _ := context.RequestFuture(child, &messages.TraverseRequest{}, TIMEOUT).Result()
+			response, err := result.(*messages.TraverseResponse)
+
+			if err {
+				pairs = append(pairs, response.Pairs...)
+			}
+		}
+
+		context.Respond(&messages.TraverseResponse{Pairs: pairs})
 	}
 }
