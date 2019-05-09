@@ -107,6 +107,7 @@ func TestCLIActor_ExecuteState_ListTrees(t *testing.T) {
 func TestCLIActor_ExecuteState_CreateTree(t *testing.T) {
 	arguments := []string{
 		"create-tree",
+		"5",
 	}
 	flags := util.Flags{
 		Timeout: time.Second * 5,

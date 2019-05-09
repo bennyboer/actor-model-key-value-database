@@ -8,9 +8,10 @@ import (
 	"sort"
 )
 
-func NewNode() actor.Actor {
-	storage := make(storage, 4)
+func NewNode(capacity int) actor.Actor {
+	storage := make(storage, capacity+1)
 	act := &Node{
+		capacity:  capacity,
 		values:    &storage,
 		searchkey: math.MinInt32,
 		behavior:  actor.NewBehavior(),
@@ -53,15 +54,20 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			context.Respond(&messages.RemoveResponse{Success: false, RemovedPair: nil})
 		}
 	case *messages.InsertRequest:
-		if len(*node.values) < CAPACITY {
+		if len(*node.values) <= node.capacity {
 			(*node.values)[msg.Entry.Key] = msg.Entry.Value
 			log.Printf("[Node] Inserted %d with %v", msg.Entry.Key, msg.Entry.Value)
 		} else {
 			// Spawn both children
-			context.Spawn(actor.PropsFromProducer(NewNode))
-			context.Spawn(actor.PropsFromProducer(NewNode))
+			context.Spawn(actor.PropsFromProducer(func() actor.Actor {
+				return NewNode(node.capacity)
+			}))
+			context.Spawn(actor.PropsFromProducer(func() actor.Actor {
+				return NewNode(node.capacity)
+			}))
+
 			(*node.values)[msg.Entry.Key] = msg.Entry.Value
-			var keys = make([]int32, 0, 4)
+			var keys = make([]int32, 0, node.capacity+1)
 
 			for k := range *node.values {
 				keys = append(keys, k)
@@ -70,18 +76,24 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			sort.Slice(keys, func(i, j int) bool {
 				return keys[i] < keys[j]
 			})
-			node.searchkey = keys[2]
+			midIndex := len(keys) / 2
+			isEven := len(keys)%2 == 0
+			if !isEven {
+				midIndex++
+			}
+			node.searchkey = keys[midIndex]
 
 			for i, k := range keys {
 				var entry = messages.KeyValuePair{Key: k, Value: (*node.values)[k]}
 				var index = 0
-				if i >= (CAPACITY+1)/2 {
+				if i > midIndex {
 					index = 1
 				}
 				context.Send(context.Children()[index], &messages.InsertRequest{Entry: &entry, TreeId: msg.TreeId})
 			}
-			(*node).values = nil
+
 			// Leaf is now a node
+			(*node).values = nil
 			node.behavior.Become(node.NodeBehavior)
 			log.Printf("[Node] Leaf is now a node")
 		}
@@ -113,17 +125,21 @@ func (node *Node) NodeBehavior(context actor.Context) {
 
 	case *messages.InsertRequest:
 		var address *actor.PID
-		if node.searchkey <= msg.Entry.Key {
+		if node.searchkey < msg.Entry.Key {
 			if len(context.Children()) > 1 {
 				address = context.Children()[1]
 			} else {
-				address = context.Spawn(actor.PropsFromProducer(NewNode))
+				address = context.Spawn(actor.PropsFromProducer(func() actor.Actor {
+					return NewNode(node.capacity)
+				}))
 			}
 		} else {
 			if len(context.Children()) > 0 {
 				address = context.Children()[0]
 			} else {
-				address = context.Spawn(actor.PropsFromProducer(NewNode))
+				address = context.Spawn(actor.PropsFromProducer(func() actor.Actor {
+					return NewNode(node.capacity)
+				}))
 			}
 		}
 		context.Forward(address)
@@ -134,7 +150,7 @@ func (node *Node) NodeBehavior(context actor.Context) {
 			child.Poison()
 		}
 	case *messages.TraverseRequest:
-		var pairs = make([]*messages.KeyValuePair, 0, 3)
+		var pairs = make([]*messages.KeyValuePair, 0, node.capacity)
 		for _, child := range context.Children() {
 			result, _ := context.RequestFuture(child, &messages.TraverseRequest{}, TIMEOUT).Result()
 			response, err := result.(*messages.TraverseResponse)

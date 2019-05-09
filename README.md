@@ -29,7 +29,7 @@ tree-cli <flags...> [action] <arguments...>
 | Aktion | Beschreibung | Beispiel |
 | --- | --- | --- |
 | `list` | Listet alle vorhandenen Baum IDs auf. | `tree-cli trees` |
-| `create-tree` | Erstellt einen neuen Baum, liefert die ID des neuen Baums und ein Sizungstoken, welcher benötigt wird um mit dem `tree-service` zu reden. | `tree-cli create-tree` |
+| `create-tree` | Erstellt einen neuen Baum, liefert die ID des neuen Baums und ein Sizungstoken, welcher benötigt wird um mit dem `tree-service` zu reden. Außerdem wird die Kapazität jedes Baumblattes übergeben. | `tree-cli create-tree 5` |
 | `delete-tree` | Löscht einen Baum. Benötigt die ID des zu löschenden Baums und den dazugehörigen Token. | `tree-cli --id=42 --token=abc123 delete-tree` |
 | `insert` | Fügt ein neues Schlüssel-Wert Paar in einen Baum ein. Benötigt Baum ID und Token. | `tree-cli --id=42 --token=abc123 insert 6 "Hallo Welt"` |
 | `remove` | Löscht ein bestehendes Schlüssel-Wert Paar in einem Baum. Benötigt Baum ID und Token. | `tree-cli --id=42 --token=abc123 remove 6` |

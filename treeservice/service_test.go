@@ -12,15 +12,11 @@ const timeout = time.Second * 5
 
 // UTILITY METHODS
 
-func getTreeServiceProps() *actor.Props {
-	return actor.PropsFromProducer(func() actor.Actor {
-		return newRoot()
-	})
-}
-
 // Create a tree for testing.
-func createTree(t *testing.T, rootContext *actor.RootContext, servicePID *actor.PID) *messages.TreeIdentifier {
-	message := messages.CreateTreeRequest{}
+func createTree(t *testing.T, rootContext *actor.RootContext, servicePID *actor.PID, capacity int) *messages.TreeIdentifier {
+	message := messages.CreateTreeRequest{
+		Capacity: int32(capacity),
+	}
 
 	future := rootContext.RequestFuture(servicePID, &message, timeout)
 
@@ -49,11 +45,11 @@ func createTree(t *testing.T, rootContext *actor.RootContext, servicePID *actor.
 	return response.TreeId
 }
 
-func createTrees(t *testing.T, ctx *actor.RootContext, servicePID *actor.PID, count int) []*messages.TreeIdentifier {
+func createTrees(t *testing.T, ctx *actor.RootContext, servicePID *actor.PID, count int, capacity int) []*messages.TreeIdentifier {
 	treeIds := make([]*messages.TreeIdentifier, 0, count)
 
 	for i := 0; i < count; i++ {
-		treeIds = append(treeIds, createTree(t, ctx, servicePID))
+		treeIds = append(treeIds, createTree(t, ctx, servicePID, capacity))
 	}
 
 	return treeIds
@@ -154,18 +150,22 @@ func traverse(t *testing.T, ctx *actor.RootContext, servicePID *actor.PID, treeI
 
 func TestService_CreateTree(t *testing.T) {
 	rootContext := actor.EmptyRootContext
-	servicePID := rootContext.Spawn(getTreeServiceProps())
+	servicePID := rootContext.Spawn(actor.PropsFromProducer(func() actor.Actor {
+		return newRoot()
+	}))
 
-	createTree(t, rootContext, servicePID)
+	createTree(t, rootContext, servicePID, 5)
 	// Well, if it works it ain't stupid
 }
 
 func TestService_ListTrees(t *testing.T) {
 	rootContext := actor.EmptyRootContext
-	servicePID := rootContext.Spawn(getTreeServiceProps())
+	servicePID := rootContext.Spawn(actor.PropsFromProducer(func() actor.Actor {
+		return newRoot()
+	}))
 
 	// Create multiple trees first
-	expectedTreeIds := createTrees(t, rootContext, servicePID, 3)
+	expectedTreeIds := createTrees(t, rootContext, servicePID, 3, 5)
 	actualTreeIds := listTrees(t, rootContext, servicePID)
 
 	for i := 0; i < 3; i++ {
@@ -186,10 +186,12 @@ func TestService_ListTrees(t *testing.T) {
 
 func TestService_DeleteTree(t *testing.T) {
 	rootContext := actor.EmptyRootContext
-	servicePID := rootContext.Spawn(getTreeServiceProps())
+	servicePID := rootContext.Spawn(actor.PropsFromProducer(func() actor.Actor {
+		return newRoot()
+	}))
 
 	// Create multiple trees first
-	treeIds := createTrees(t, rootContext, servicePID, 3)
+	treeIds := createTrees(t, rootContext, servicePID, 3, 5)
 
 	// Delete one
 	treeToDelete := treeIds[1]
@@ -255,10 +257,12 @@ func TestService_DeleteTree(t *testing.T) {
 
 func TestService_InsertKeyValuePair(t *testing.T) {
 	rootContext := actor.EmptyRootContext
-	servicePID := rootContext.Spawn(getTreeServiceProps())
+	servicePID := rootContext.Spawn(actor.PropsFromProducer(func() actor.Actor {
+		return newRoot()
+	}))
 
 	// Create tree to test first
-	treeId := createTree(t, rootContext, servicePID)
+	treeId := createTree(t, rootContext, servicePID, 5)
 
 	entry := messages.KeyValuePair{
 		Key:   54,
@@ -284,10 +288,12 @@ func TestService_InsertKeyValuePair(t *testing.T) {
 
 func TestService_SearchKeyValuePair(t *testing.T) {
 	rootContext := actor.EmptyRootContext
-	servicePID := rootContext.Spawn(getTreeServiceProps())
+	servicePID := rootContext.Spawn(actor.PropsFromProducer(func() actor.Actor {
+		return newRoot()
+	}))
 
 	// Create tree to test first
-	treeId := createTree(t, rootContext, servicePID)
+	treeId := createTree(t, rootContext, servicePID, 5)
 
 	// Test if something, that is not there can't be found
 	result := search(t, rootContext, servicePID, treeId, 54)
@@ -301,10 +307,12 @@ func TestService_SearchKeyValuePair(t *testing.T) {
 
 func TestService_RemoveKeyValuePair(t *testing.T) {
 	rootContext := actor.EmptyRootContext
-	servicePID := rootContext.Spawn(getTreeServiceProps())
+	servicePID := rootContext.Spawn(actor.PropsFromProducer(func() actor.Actor {
+		return newRoot()
+	}))
 
 	// Create tree to test first
-	treeId := createTree(t, rootContext, servicePID)
+	treeId := createTree(t, rootContext, servicePID, 3)
 
 	// Insert value
 	insert(t, rootContext, servicePID, treeId, 3243, "Hallo Welt")
@@ -336,10 +344,12 @@ func TestService_RemoveKeyValuePair(t *testing.T) {
 
 func TestService_TraverseKeyValuePairs(t *testing.T) {
 	rootContext := actor.EmptyRootContext
-	servicePID := rootContext.Spawn(getTreeServiceProps())
+	servicePID := rootContext.Spawn(actor.PropsFromProducer(func() actor.Actor {
+		return newRoot()
+	}))
 
 	// First and foremost create a tree
-	treeId := createTree(t, rootContext, servicePID)
+	treeId := createTree(t, rootContext, servicePID, 3)
 
 	// Then create some entries
 	count := 13

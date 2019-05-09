@@ -37,14 +37,14 @@ type RootActor struct {
 }
 
 func newRoot() *RootActor {
-	actor := &RootActor{
+	a := &RootActor{
 		idToData: make(map[int32]TreeData),
 		trees:    make([]int32, 0),
 		behavior: actor.NewBehavior(),
 	}
-	actor.behavior.Become(actor.rootBehavior)
+	a.behavior.Become(a.rootBehavior)
 
-	return actor
+	return a
 }
 
 func (root *RootActor) Receive(ctx actor.Context) {
@@ -56,7 +56,9 @@ func (root *RootActor) rootBehavior(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *messages.CreateTreeRequest:
 		log.Printf("Create Tree Request incoming! %v\n", msg)
-		pid := ctx.Spawn(actor.PropsFromProducer(tree.NewNode))
+		pid := ctx.Spawn(actor.PropsFromProducer(func() actor.Actor {
+			return tree.NewNode(int(msg.Capacity))
+		}))
 		token := RandStringRunes(5)
 
 		id := root.lastIns + 1

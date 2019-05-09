@@ -7,13 +7,13 @@ import (
 
 type storage map[int32]string
 
-const CAPACITY int = 3
 const TIMEOUT time.Duration = 1000
 
 type Node struct {
 	searchkey int32
 	values    *storage
 	behavior  actor.Behavior
+	capacity  int
 }
 
 func (state *Node) Receive(context actor.Context) {
