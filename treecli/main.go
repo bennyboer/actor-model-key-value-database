@@ -19,12 +19,16 @@ func main() {
 		printHelp()
 	} else {
 		result, err := process(arguments, flags).Result()
-
 		if err != nil {
 			log.Fatalf("Command execution failed:\n%s\n", err.Error())
-		} else {
-			log.Printf("Command execution finished successfully:\n%v\n", result)
 		}
+
+		response, ok := result.(*local_messages.CLIExecuteReply)
+		if !ok {
+			log.Fatalf("Answer of the CLI Actor is incorrect")
+		}
+
+		log.Println(response.Message)
 	}
 }
 

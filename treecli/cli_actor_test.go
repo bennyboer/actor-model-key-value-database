@@ -72,7 +72,7 @@ func TestCLIActor_ExecuteState_ListTrees(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(local_messages.CLIExecuteReply)
+	response, ok := result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -151,7 +151,7 @@ func TestCLIActor_ExecuteState_CreateTree(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(local_messages.CLIExecuteReply)
+	response, ok := result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -262,7 +262,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(local_messages.CLIExecuteReply)
+	response, ok := result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -298,7 +298,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 		t.Errorf("expected no error; got %s\n", err.Error())
 	}
 
-	response, ok = result.(local_messages.CLIExecuteReply)
+	response, ok = result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -335,7 +335,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 		t.Errorf("expected no error; got %s\n", err.Error())
 	}
 
-	response, ok = result.(local_messages.CLIExecuteReply)
+	response, ok = result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -473,7 +473,7 @@ func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(local_messages.CLIExecuteReply)
+	response, ok := result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -510,7 +510,7 @@ func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok = result.(local_messages.CLIExecuteReply)
+	response, ok = result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -639,7 +639,7 @@ func TestCLIActor_ExecuteState_Remove(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(local_messages.CLIExecuteReply)
+	response, ok := result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -684,7 +684,7 @@ func TestCLIActor_ExecuteState_Remove(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok = result.(local_messages.CLIExecuteReply)
+	response, ok = result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -770,7 +770,7 @@ func TestCLIActor_ExecuteState_Search(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(local_messages.CLIExecuteReply)
+	response, ok := result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -815,7 +815,7 @@ func TestCLIActor_ExecuteState_Search(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok = result.(local_messages.CLIExecuteReply)
+	response, ok = result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -952,7 +952,7 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(local_messages.CLIExecuteReply)
+	response, ok := result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -990,7 +990,7 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok = result.(local_messages.CLIExecuteReply)
+	response, ok = result.(*local_messages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
