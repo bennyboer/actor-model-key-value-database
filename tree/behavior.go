@@ -147,6 +147,7 @@ func (node *Node) NodeBehavior(context actor.Context) {
 		node.forwardKeyedMessage(context, msg.Key)
 	case *messages.DeleteTreeRequest:
 		for _, child := range context.Children() {
+			context.Send(child, &messages.DeleteTreeRequest{})
 			child.Poison()
 		}
 	case *messages.TraverseRequest:
