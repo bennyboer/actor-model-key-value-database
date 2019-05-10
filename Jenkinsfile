@@ -6,7 +6,8 @@ pipeline {
                 docker { image 'obraun/vss-protoactor-jenkins' }
             }
             steps {
-                sh 'cd ./build'
+                sh 'ls'
+                sh 'cd build'
                 sh 'ls'
                 sh 'chmod +x ./install_protoc.sh'
                 sh './install_protoc.sh'
