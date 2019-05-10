@@ -6,9 +6,7 @@ pipeline {
                 docker { image 'obraun/vss-protoactor-jenkins' }
             }
             steps {
-                sh 'cd messages && make regenerate'
-                sh 'cd treeservice && go build main.go'
-                sh 'cd treecli && go build main.go'
+                sh 'build'
             }
         }
         stage('Test') {
