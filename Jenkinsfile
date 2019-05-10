@@ -7,6 +7,7 @@ pipeline {
             }
             steps {
                 sh '''
+                    git reset --hard
                     go version
                     go env
                     cd build
@@ -23,8 +24,8 @@ pipeline {
                 docker { image 'obraun/vss-protoactor-jenkins' }
             }
             steps {
-                sh 'echo run tests...'
-                sh 'go test ./...'
+                sh 'echo run tests with code coverage...'
+                sh 'go test ./... -cover'
             }
         }
         stage('Lint') {
