@@ -20,6 +20,7 @@ before_script:
 
 script:
     - echo run tests...
+    - chmod +x ./build.sh
     - ./build.sh
     - go test ./...
     - golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false
