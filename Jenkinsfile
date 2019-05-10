@@ -1,10 +1,5 @@
 pipeline {
     agent none
-    pre {
-        always {
-            cleanWs()
-        }
-    }
     stages {
         stage('Build') {
             agent {
@@ -12,6 +7,11 @@ pipeline {
             }
             steps {
                 sh '''
+                    ls
+                    cd messages
+                    ls
+                    cd ..
+                    git status
                     go version
                     cd build
                     chmod +x ./install_protoc.sh
