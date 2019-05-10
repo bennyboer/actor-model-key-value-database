@@ -1,5 +1,10 @@
 pipeline {
     agent none
+    pre {
+        always {
+            cleanWs()
+        }
+    }
     stages {
         stage('Build') {
             agent {
