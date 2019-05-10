@@ -5,6 +5,7 @@ go get -t
 
 echo "Compiling protobuf messages"
 cd ./messages
+chmod +x ./build.sh
 ./build.sh
 cd ..
 
