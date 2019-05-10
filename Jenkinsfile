@@ -7,12 +7,11 @@ pipeline {
             }
             steps {
                 sh '''
+                    go version
                     cd build
-                    ls
                     chmod +x ./install_protoc.sh
                     . ./install_protoc.sh
                     cd ..
-                    echo $PATH
                     chmod +x ./build.sh
                     ./build.sh
                 '''

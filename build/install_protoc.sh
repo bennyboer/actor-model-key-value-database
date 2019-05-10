@@ -13,6 +13,5 @@ chmod +x ./bin/protoc
 # Add to path
 PROTOC_BINARY_PATH=$(realpath bin/protoc)
 PATH=${PATH}:${PROTOC_BINARY_PATH}
-echo $PATH
 
 protoc --version
