@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/sh
+
 protoc -I=. -I=${GOPATH}/src --gogoslick_out=plugins=grpc:. \
     list_trees.proto \
     create_tree.proto \
