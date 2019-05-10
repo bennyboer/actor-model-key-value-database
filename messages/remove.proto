@@ -20,4 +20,6 @@ message RemoveResponse {
 
     // The removed key-value pair.
     KeyValuePair removedPair = 2;
+
+    string errorMessage = 3;
 }

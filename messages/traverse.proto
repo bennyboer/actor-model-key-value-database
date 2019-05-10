@@ -12,6 +12,8 @@ message TraverseRequest {
 
 // Response of the traverse operation.
 message TraverseResponse {
+    bool success = 1;
     // All key-value pairs in sorted order.
-    repeated KeyValuePair pairs = 1;
+    repeated KeyValuePair pairs = 2;
+    string errorMessage = 3;
 }

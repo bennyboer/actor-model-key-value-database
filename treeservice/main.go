@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/AsynkronIT/goconsole"
@@ -52,7 +53,6 @@ func (root *RootActor) Receive(ctx actor.Context) {
 }
 
 func (root *RootActor) rootBehavior(ctx actor.Context) {
-
 	switch msg := ctx.Message().(type) {
 	case *messages.CreateTreeRequest:
 		log.Printf("Create Tree Request incoming! %v\n", msg)
@@ -119,29 +119,61 @@ func (root *RootActor) rootBehavior(ctx actor.Context) {
 		}
 	case *messages.InsertRequest:
 		log.Printf("Insert Request incoming %v ", msg)
-		forward(ctx, root, msg.TreeId)
-
+		err := forward(ctx, root, msg.TreeId)
+		if err != nil {
+			ctx.Respond(&messages.InsertResponse{
+				Success:      false,
+				ErrorMessage: err.Error(),
+			})
+		}
 	case *messages.SearchRequest:
 		log.Printf("Search Request incoming %v ", msg)
-		forward(ctx, root, msg.TreeId)
-
+		err := forward(ctx, root, msg.TreeId)
+		if err != nil {
+			ctx.Respond(&messages.SearchResponse{
+				Success:      false,
+				Entry:        nil,
+				ErrorMessage: err.Error(),
+			})
+		}
 	case *messages.RemoveRequest:
 		log.Printf("Remove Request incoming %v ", msg)
-		forward(ctx, root, msg.TreeId)
-
+		err := forward(ctx, root, msg.TreeId)
+		if err != nil {
+			ctx.Respond(&messages.RemoveResponse{
+				Success:      false,
+				RemovedPair:  nil,
+				ErrorMessage: err.Error(),
+			})
+		}
 	case *messages.TraverseRequest:
 		log.Printf("Traverse Request incoming %v ", msg)
-		forward(ctx, root, msg.TreeId)
+		err := forward(ctx, root, msg.TreeId)
+		if err != nil {
+			ctx.Respond(&messages.TraverseResponse{
+				Success:      false,
+				Pairs:        nil,
+				ErrorMessage: err.Error(),
+			})
+		}
 	}
 }
 
-func forward(ctx actor.Context, root *RootActor, data *messages.TreeIdentifier) {
-	if root.idToData[data.Id].token == data.Token {
-		ctx.Forward(root.idToData[data.Id].pid)
-		log.Printf("\n")
-	} else {
-		log.Printf("Wrong token!\n")
+func forward(ctx actor.Context, root *RootActor, data *messages.TreeIdentifier) error {
+	treeData, ok := root.idToData[data.Id]
+
+	if !ok {
+		return errors.New(fmt.Sprintf("unknown tree identifier %d", data.Id))
 	}
+
+	if data.Token != treeData.token {
+		return errors.New("the tree access token you supplied is incorrect")
+	}
+
+	ctx.Forward(treeData.pid)
+	log.Printf("\n")
+
+	return nil
 }
 
 func main() {

@@ -137,19 +137,24 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 		a.behavior.Become(a.ExecuteState)
 	case *messages.TraverseResponse:
 		var message string
-		if msg.Pairs != nil {
-			var sb strings.Builder
 
-			sb.WriteString("All key-value pairs:\n")
+		if msg.Success {
+			if msg.Pairs != nil {
+				var sb strings.Builder
 
-			for _, pairPtr := range msg.Pairs {
-				pair := *pairPtr
-				sb.WriteString(fmt.Sprintf("  - Key: %d, Value: '%s'\n", pair.Key, pair.Value))
+				sb.WriteString("All key-value pairs:\n")
+
+				for _, pairPtr := range msg.Pairs {
+					pair := *pairPtr
+					sb.WriteString(fmt.Sprintf("  - Key: %d, Value: '%s'\n", pair.Key, pair.Value))
+				}
+
+				message = sb.String()
+			} else {
+				message = "Could not traverse tree."
 			}
-
-			message = sb.String()
 		} else {
-			message = "Could not traverse tree."
+			message = msg.ErrorMessage
 		}
 
 		ctx.Send(a.sender, &local_messages.CLIExecuteReply{

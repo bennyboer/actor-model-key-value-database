@@ -17,4 +17,6 @@ message InsertRequest {
 message InsertResponse {
     // Whether the operation was successful.
     bool success = 1;
+
+    string errorMessage = 2;
 }

@@ -907,6 +907,7 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 
 			if msg.TreeId.Id == 123 {
 				ctx.Respond(&messages.TraverseResponse{
+					Success: true,
 					Pairs: []*messages.KeyValuePair{
 						&messages.KeyValuePair{
 							Key:   1,
@@ -924,7 +925,9 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 				})
 			} else {
 				ctx.Respond(&messages.TraverseResponse{
-					Pairs: nil,
+					Pairs:        nil,
+					Success:      false,
+					ErrorMessage: "Tree id is incorrect",
 				})
 			}
 		}
@@ -958,7 +961,7 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
 
-	expectedResultMessage := "Could not traverse tree."
+	expectedResultMessage := "Tree id is incorrect"
 
 	if response.Message != expectedResultMessage {
 		t.Errorf("expected message '%s'; got '%s'", expectedResultMessage, response.Message)
@@ -971,6 +974,10 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 
 	if original.Pairs != nil {
 		t.Errorf("expected original response to have no pairs")
+	}
+
+	if original.Success != false {
+		t.Error("expected original response to be unsuccessful")
 	}
 
 	// Test successful traverse
@@ -1013,6 +1020,10 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 
 	if original.Pairs == nil {
 		t.Errorf("expected original response to have pairs")
+	}
+
+	if original.Success != true {
+		t.Error("expected original response to be successful")
 	}
 
 	if len(original.Pairs) != 3 {

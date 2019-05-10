@@ -21,4 +21,6 @@ message SearchResponse {
     // Found key-value pair.
     // This is only set if success is true.
     KeyValuePair entry = 2;
+
+    string errorMessage = 3;
 }

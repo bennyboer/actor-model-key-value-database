@@ -2,6 +2,7 @@ package tree
 
 import (
 	"errors"
+	"fmt"
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"log"
@@ -29,18 +30,18 @@ func (n *Node) forwardKeyedMessage(context actor.Context, key int32) error {
 		if len(context.Children()) > 0 {
 			address = context.Children()[0]
 		} else {
-			return errors.New("cannot find left child")
+			return errors.New("cannot find left child of node")
 		}
 	} else {
 		if len(context.Children()) > 1 {
 			address = context.Children()[1]
 		} else {
-			return errors.New("cannot find right child")
+			return errors.New("cannot find right child of node")
 		}
 	}
 
 	if address == nil {
-		return errors.New("could not forward message to child")
+		return errors.New("could not forward message to child of node")
 	}
 
 	context.Forward(address)
@@ -53,17 +54,31 @@ func (n *Node) LeafBehavior(context actor.Context) {
 	case *messages.SearchRequest:
 		if val, ok := (*n.values)[msg.Key]; ok {
 			var keyValue = messages.KeyValuePair{Key: msg.Key, Value: val}
-			context.Respond(&messages.SearchResponse{Success: true, Entry: &keyValue})
+			context.Respond(&messages.SearchResponse{
+				Success: true,
+				Entry:   &keyValue,
+			})
 		} else {
-			context.Respond(&messages.SearchResponse{Success: false, Entry: nil})
+			context.Respond(&messages.SearchResponse{
+				Success:      false,
+				Entry:        nil,
+				ErrorMessage: fmt.Sprintf("Could not find entry with key %d", msg.Key),
+			})
 		}
 	case *messages.RemoveRequest:
 		if val, ok := (*n.values)[msg.Key]; ok {
 			removed := messages.KeyValuePair{Key: msg.Key, Value: val}
 			delete(*n.values, msg.Key)
-			context.Respond(&messages.RemoveResponse{Success: true, RemovedPair: &removed})
+			context.Respond(&messages.RemoveResponse{
+				Success:     true,
+				RemovedPair: &removed,
+			})
 		} else {
-			context.Respond(&messages.RemoveResponse{Success: false, RemovedPair: nil})
+			context.Respond(&messages.RemoveResponse{
+				Success:      false,
+				RemovedPair:  nil,
+				ErrorMessage: fmt.Sprintf("Could not find key %d to delete", msg.Key),
+			})
 		}
 	case *messages.InsertRequest:
 		if len(*n.values) <= n.capacity {
@@ -119,7 +134,10 @@ func (n *Node) LeafBehavior(context actor.Context) {
 			n.behavior.Become(n.NodeBehavior)
 			log.Printf("[Node] Leaf is now a node")
 		}
-		context.Respond(&messages.InsertResponse{Success: true})
+
+		context.Respond(&messages.InsertResponse{
+			Success: true,
+		})
 	case *messages.TraverseRequest:
 		var pairs = make([]*messages.KeyValuePair, 0, len(*n.values))
 
@@ -135,7 +153,8 @@ func (n *Node) LeafBehavior(context actor.Context) {
 		})
 
 		context.Respond(&messages.TraverseResponse{
-			Pairs: pairs,
+			Success: true,
+			Pairs:   pairs,
 		})
 	}
 }
@@ -146,8 +165,9 @@ func (n *Node) NodeBehavior(context actor.Context) {
 		err := n.forwardKeyedMessage(context, msg.Key)
 		if err != nil {
 			context.Respond(&messages.SearchResponse{
-				Success: false,
-				Entry:   nil,
+				Success:      false,
+				Entry:        nil,
+				ErrorMessage: err.Error(),
 			})
 		}
 	case *messages.InsertRequest:
@@ -171,13 +191,15 @@ func (n *Node) NodeBehavior(context actor.Context) {
 				}))
 			}
 		}
+
 		context.Forward(address)
 	case *messages.RemoveRequest:
 		err := n.forwardKeyedMessage(context, msg.Key)
 		if err != nil {
 			context.Respond(&messages.RemoveResponse{
-				Success:     false,
-				RemovedPair: nil,
+				Success:      false,
+				RemovedPair:  nil,
+				ErrorMessage: err.Error(),
 			})
 		}
 	case *messages.DeleteTreeRequest:
@@ -194,12 +216,18 @@ func (n *Node) NodeBehavior(context actor.Context) {
 			if ok {
 				pairs = append(pairs, response.Pairs...)
 			} else {
-				log.Fatalf("Child node responded with incompatible type. Expected TraverseResponse")
+				log.Println("Child node responded with incompatible type. Expected TraverseResponse")
+				context.Respond(&messages.TraverseResponse{
+					Success:      false,
+					Pairs:        nil,
+					ErrorMessage: "FATAL: Child node responded with incompatible type",
+				})
 			}
 		}
 
 		context.Respond(&messages.TraverseResponse{
-			Pairs: pairs,
+			Success: true,
+			Pairs:   pairs,
 		})
 	}
 }
