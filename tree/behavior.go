@@ -151,7 +151,6 @@ func (n *Node) NodeBehavior(context actor.Context) {
 			})
 		}
 	case *messages.InsertRequest:
-		println("Insert into node")
 		var address *actor.PID
 		if n.searchkey < msg.Entry.Key {
 			if len(context.Children()) > 1 {
@@ -190,13 +189,17 @@ func (n *Node) NodeBehavior(context actor.Context) {
 		pairs := make([]*messages.KeyValuePair, 0)
 		for _, child := range context.Children() {
 			result, _ := context.RequestFuture(child, &messages.TraverseRequest{}, TIMEOUT).Result()
-			response, err := result.(*messages.TraverseResponse)
+			response, ok := result.(*messages.TraverseResponse)
 
-			if err {
+			if ok {
 				pairs = append(pairs, response.Pairs...)
+			} else {
+				log.Fatalf("Child node responded with incompatible type. Expected TraverseResponse")
 			}
 		}
 
-		context.Respond(&messages.TraverseResponse{Pairs: pairs})
+		context.Respond(&messages.TraverseResponse{
+			Pairs: pairs,
+		})
 	}
 }

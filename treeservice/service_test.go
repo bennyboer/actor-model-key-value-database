@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const timeout = time.Second * 5
+const timeout = time.Second * 20
 
 // UTILITY METHODS
 
