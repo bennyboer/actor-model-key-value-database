@@ -7,7 +7,7 @@ import (
 
 type Storage map[int32]string
 
-const TIMEOUT time.Duration = 1000
+const TIMEOUT = time.Second * 5
 
 type Node struct {
 	searchkey int32

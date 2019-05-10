@@ -139,8 +139,10 @@ func (n *Node) LeafBehavior(context actor.Context) {
 			Success: true,
 		})
 	case *messages.TraverseRequest:
+		log.Println("Traverse LEAF")
 		var pairs = make([]*messages.KeyValuePair, 0, len(*n.values))
 
+		log.Println("Iterating over pairs")
 		for k, v := range *(n.values) {
 			pairs = append(pairs, &messages.KeyValuePair{
 				Key:   k,
@@ -148,10 +150,12 @@ func (n *Node) LeafBehavior(context actor.Context) {
 			})
 		}
 
+		log.Println("Sort pairs")
 		sort.Slice(pairs, func(i, j int) bool {
 			return pairs[i].Key < pairs[j].Key
 		})
 
+		log.Println("Respond TraverseResponse")
 		context.Respond(&messages.TraverseResponse{
 			Success: true,
 			Pairs:   pairs,
@@ -208,6 +212,7 @@ func (n *Node) NodeBehavior(context actor.Context) {
 			child.Poison()
 		}
 	case *messages.TraverseRequest:
+		log.Println("Traverse NODE")
 		pairs := make([]*messages.KeyValuePair, 0)
 		for _, child := range context.Children() {
 			result, _ := context.RequestFuture(child, &messages.TraverseRequest{}, TIMEOUT).Result()
