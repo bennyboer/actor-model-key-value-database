@@ -6,7 +6,7 @@ pipeline {
                 docker { image 'obraun/vss-protoactor-jenkins' }
             }
             steps {
-                sh 'sudo apt-get install protobuf-compiler'
+                sh 'cat /etc/os-release'
                 sh 'chmod +x ./build.sh'
                 sh './build.sh'
             }
