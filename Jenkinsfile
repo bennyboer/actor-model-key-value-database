@@ -6,7 +6,7 @@ pipeline {
                 docker { image 'obraun/vss-protoactor-jenkins' }
             }
             steps {
-                sh 'apk add protobuf'
+                sh 'sudo apk add protobuf'
                 sh 'chmod +x ./build.sh'
                 sh './build.sh'
             }
