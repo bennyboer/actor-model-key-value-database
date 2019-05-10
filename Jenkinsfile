@@ -7,6 +7,7 @@ pipeline {
             }
             steps {
                 sh 'cd ./build'
+                sh 'ls'
                 sh 'chmod +x ./install_protoc.sh'
                 sh './install_protoc.sh'
                 sh 'cd ..'
