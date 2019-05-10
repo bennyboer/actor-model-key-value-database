@@ -19,8 +19,9 @@ before_script:
     - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.16.0
 
 script:
-    - echo run tests...
+    - GO111MODULE=on
     - chmod +x ./build.sh
     - ./build.sh
+    - echo run tests...
     - go test ./...
     - golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false
