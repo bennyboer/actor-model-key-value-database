@@ -2,6 +2,7 @@
 
 echo Fetching dependencies
 @echo on
+go install github.com/gogo/protobuf/protoc-gen-gogoslick
 go get
 @echo off
 

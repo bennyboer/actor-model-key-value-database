@@ -1,6 +1,7 @@
 #!/bin/sh
 
 echo "Fetching dependencies"
+go install github.com/gogo/protobuf/protoc-gen-gogoslick
 go get
 
 echo "Compiling protobuf messages"

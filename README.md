@@ -59,8 +59,13 @@ Die ausführbaren Dateien `tree-cli.exe` und `tree-service.exe` befindet sich da
 
 #### Go packages installieren
 
-```bash
+```sh
 go get
+```
+
+#### Notwendige Go Werkzeuge installieren
+```sh
+go install github.com/gogo/protobuf/protoc-gen-gogoslick
 ```
 
 #### Bauen der Messages (Google Protocol Buffers)
