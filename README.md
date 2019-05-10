@@ -1,6 +1,7 @@
 ## Benutzung
 
-> Vor dem Benutzen der Anwendung muss die Anwendung entweder mit Docker oder ohne Docker gebaut werden. Siehe spätere Abschnitte.
+> Vor dem Benutzen der Anwendung muss die Anwendung entweder mit Docker oder ohne Docker gebaut werden. 
+> Siehe spätere Abschnitte.
 
 ### Service
 
@@ -59,7 +60,7 @@ Die ausführbaren Dateien `tree-cli.exe` und `tree-service.exe` befindet sich da
 #### Go packages installieren
 
 ```bash
-go get -t
+go get
 ```
 
 #### Bauen der Messages (Google Protocol Buffers)

@@ -2,7 +2,7 @@
 
 echo Fetching dependencies
 @echo on
-go get -t
+go get
 @echo off
 
 echo Compiling protobuf messages

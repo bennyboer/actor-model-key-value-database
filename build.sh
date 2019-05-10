@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "Fetching dependencies"
-go get -t
+go get
 
 echo "Compiling protobuf messages"
 cd ./messages
