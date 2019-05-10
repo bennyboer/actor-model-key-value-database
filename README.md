@@ -95,7 +95,7 @@ Im `messages` Ordner befindet sich eine `build.bat` (Windows) und eine `build.sh
     `treeservice` (entspricht dem Argument von `--name`) im Netzwerk `actors`:
 
     ```
-    docker run --rm --net actors --name treeservice treeservice \
+    docker run --rm --net actors --name treeservice tree-service \
       --bind="treeservice.actors:8090"
     ```
 
@@ -110,8 +110,8 @@ Im `messages` Ordner befindet sich eine `build.bat` (Windows) und eine `build.sh
     dem Namen und Port `treeservice.actors:8090`:
 
     ```
-    docker run --rm --net actors --name treecli treecli --bind="treecli.actors:8091" \
-      --remote="treeservice.actors:8090" trees
+    docker run --rm --net actors --name treecli tree-cli --bind="treecli.actors:8091" \
+      --remote="treeservice.actors:8090" list
     ```
 
     Hier sind wieder die beiden Flags `--bind` und `--remote` beliebig gewählt und
