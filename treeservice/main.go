@@ -166,7 +166,7 @@ func forward(ctx actor.Context, root *RootActor, data *messages.TreeIdentifier) 
 	treeData, ok := root.idToData[data.Id]
 
 	if !ok {
-		return errors.New(fmt.Sprintf("unknown tree identifier %d", data.Id))
+		return fmt.Errorf("unknown tree identifier %d", data.Id)
 	}
 
 	if data.Token != treeData.token {

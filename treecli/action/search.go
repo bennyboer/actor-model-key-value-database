@@ -33,7 +33,7 @@ func (Search) Execute(ctx actor.Context, flags *util.Flags, args []string, remot
 	// Parse key to search
 	key, e := strconv.ParseInt(args[0], 10, 32)
 	if e != nil {
-		return errors.New(fmt.Sprintf("the key %s is not an integer", args[0]))
+		return fmt.Errorf("the key %s is not an integer", args[0])
 	}
 
 	log.Printf("Search key: %d\n", key)

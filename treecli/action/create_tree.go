@@ -1,7 +1,6 @@
 package action
 
 import (
-	"errors"
 	"fmt"
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
@@ -23,7 +22,7 @@ func (CreateTree) Execute(ctx actor.Context, flags *util.Flags, args []string, r
 	// Parse capacity
 	capacity, e := strconv.ParseInt(args[0], 10, 32)
 	if e != nil {
-		return errors.New(fmt.Sprintf("the capacity %s is not an integer", args[0]))
+		return fmt.Errorf("the capacity %s is not an integer", args[0])
 	}
 
 	ctx.Request(remote, &messages.CreateTreeRequest{
