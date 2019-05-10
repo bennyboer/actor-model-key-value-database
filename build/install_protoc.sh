@@ -9,10 +9,10 @@ then
 fi
 
 chmod +x ./bin/protoc
-./bin/protoc --version
-ls bin
 
 # Add to path
 PROTOC_BINARY_PATH=$(realpath bin/protoc)
 PATH=${PATH}:${PROTOC_BINARY_PATH}
 echo $PATH
+
+protoc --version
