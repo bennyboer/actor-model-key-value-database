@@ -156,7 +156,7 @@ func TestService_CreateTree(t *testing.T) {
 
 	createTree(t, rootContext, servicePID, 5)
 
-	servicePID.GracefulStop()
+	servicePID.Stop()
 }
 
 func TestService_ListTrees(t *testing.T) {
@@ -183,7 +183,7 @@ func TestService_ListTrees(t *testing.T) {
 		}
 	}
 
-	servicePID.GracefulStop()
+	servicePID.Stop()
 }
 
 func TestService_DeleteTree(t *testing.T) {
@@ -256,7 +256,7 @@ func TestService_DeleteTree(t *testing.T) {
 		}
 	}
 
-	servicePID.GracefulStop()
+	servicePID.Stop()
 }
 
 func TestService_InsertKeyValuePair(t *testing.T) {
@@ -289,7 +289,7 @@ func TestService_InsertKeyValuePair(t *testing.T) {
 		t.Errorf("the inserted entry value '%s' and the found value '%s' do not match", searchResponse.Entry.Value, entry.Value)
 	}
 
-	servicePID.GracefulStop()
+	servicePID.Stop()
 }
 
 func TestService_SearchKeyValuePair(t *testing.T) {
@@ -309,7 +309,7 @@ func TestService_SearchKeyValuePair(t *testing.T) {
 	}
 
 	// The rest has already been tested with the Insert action test.
-	servicePID.GracefulStop()
+	servicePID.Stop()
 }
 
 func TestService_RemoveKeyValuePair(t *testing.T) {
@@ -348,7 +348,7 @@ func TestService_RemoveKeyValuePair(t *testing.T) {
 		t.Errorf("expected entry to have been removed")
 	}
 
-	servicePID.GracefulStop()
+	servicePID.Stop()
 }
 
 func TestService_TraverseKeyValuePairs(t *testing.T) {
@@ -397,5 +397,5 @@ func TestService_TraverseKeyValuePairs(t *testing.T) {
 		}
 	}
 
-	servicePID.GracefulStop()
+	servicePID.Stop()
 }
