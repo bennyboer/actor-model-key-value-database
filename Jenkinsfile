@@ -6,7 +6,7 @@ pipeline {
                 docker { image 'obraun/vss-protoactor-jenkins' }
             }
             steps {
-                sh 'build'
+                ./build.sh
             }
         }
         stage('Test') {
