@@ -23,5 +23,5 @@ script:
     - chmod +x ./build.sh
     - ./build.sh
     - echo run tests...
-    - go test ./...
+    - go test ./... -cover
     - golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false
