@@ -15,6 +15,5 @@ before_script:
 script:
     - echo run tests...
     - ./build.sh
-    - go test treecli
-    - go test treeservice
+    - go test ./...
     - golangci-lint run --deadline 20m --enable-all

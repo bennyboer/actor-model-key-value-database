@@ -24,10 +24,7 @@ pipeline {
             }
             steps {
                 sh 'echo run tests...'
-                sh 'echo CLI tests...'
-                sh 'go test treecli'
-                sh 'echo Service tests...'
-                sh 'go test treeservice'
+                sh 'go test ./...'
             }
         }
         stage('Lint') {
