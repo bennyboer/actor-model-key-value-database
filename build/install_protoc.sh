@@ -2,6 +2,7 @@
 
 PROTOBUF_VERSION=3.7.1
 PROTOC_FILENAME=protoc-${PROTOBUF_VERSION}-linux-x86_64.zip
+wget --help
 wget -nc https://github.com/google/protobuf/releases/download/v${PROTOBUF_VERSION}/${PROTOC_FILENAME}
 unzip -o ${PROTOC_FILENAME}
 chmod +x ./bin/protoc
