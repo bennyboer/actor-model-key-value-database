@@ -1,3 +1,5 @@
+dist: xenial
+
 language: go
 
 install:
@@ -12,4 +14,7 @@ before_script:
 
 script:
     - echo run tests...
-    - echo golangci-lint run --deadline 20m --enable-all
+    - ./build.sh
+    - go test treecli
+    - go test treeservice
+    - golangci-lint run --deadline 20m --enable-all
