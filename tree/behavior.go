@@ -55,6 +55,7 @@ func (n *Node) LeafBehavior(context actor.Context) {
 			context.Respond(&messages.RemoveResponse{Success: false, RemovedPair: nil})
 		}
 	case *messages.InsertRequest:
+		log.Println("Insert into leaf")
 		if len(*n.values) <= n.capacity {
 			(*n.values)[msg.Entry.Key] = msg.Entry.Value
 			log.Printf("[Node] Inserted %d with %v", msg.Entry.Key, msg.Entry.Value)
@@ -110,7 +111,8 @@ func (n *Node) LeafBehavior(context actor.Context) {
 		}
 		context.Respond(&messages.InsertResponse{Success: true})
 	case *messages.TraverseRequest:
-		var pairs = make([]*messages.KeyValuePair, 0, n.capacity)
+		log.Println("Traverse leaf")
+		var pairs = make([]*messages.KeyValuePair, 0, len(*n.values))
 
 		for k, v := range *(n.values) {
 			pairs = append(pairs, &messages.KeyValuePair{
@@ -135,6 +137,7 @@ func (n *Node) NodeBehavior(context actor.Context) {
 		n.forwardKeyedMessage(context, msg.Key)
 
 	case *messages.InsertRequest:
+		println("Insert into node")
 		var address *actor.PID
 		if n.searchkey < msg.Entry.Key {
 			if len(context.Children()) > 1 {
@@ -164,8 +167,10 @@ func (n *Node) NodeBehavior(context actor.Context) {
 			child.Poison()
 		}
 	case *messages.TraverseRequest:
-		var pairs = make([]*messages.KeyValuePair, 0)
+		log.Println("Traverse Node")
+		pairs := make([]*messages.KeyValuePair, 0)
 		for _, child := range context.Children() {
+			log.Println("Traverse next Node")
 			result, _ := context.RequestFuture(child, &messages.TraverseRequest{}, TIMEOUT).Result()
 			response, err := result.(*messages.TraverseResponse)
 
