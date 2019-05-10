@@ -7,7 +7,6 @@ pipeline {
             }
             steps {
                 sh '''
-                    git clean -fdx
                     go version
                     go env
                     cd build
