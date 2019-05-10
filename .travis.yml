@@ -1,5 +1,12 @@
 language: go
 
+install:
+    - pushd ./build
+    - chmod +x ./install_protoc.sh
+    - ./install_protoc.sh
+    - popd
+    - echo $PATH
+
 before_script:
     - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.16.0
 
