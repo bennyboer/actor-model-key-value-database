@@ -16,6 +16,6 @@ type Node struct {
 	capacity  int
 }
 
-func (state *Node) Receive(context actor.Context) {
-	state.behavior.Receive(context)
+func (n *Node) Receive(context actor.Context) {
+	n.behavior.Receive(context)
 }

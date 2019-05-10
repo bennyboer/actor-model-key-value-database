@@ -37,33 +37,33 @@ func (n *Node) forwardKeyedMessage(context actor.Context, key int32) {
 	}
 }
 
-func (node *Node) LeafBehavior(context actor.Context) {
+func (n *Node) LeafBehavior(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *messages.SearchRequest:
-		if val, ok := (*node.values)[msg.Key]; ok {
+		if val, ok := (*n.values)[msg.Key]; ok {
 			var keyValue = messages.KeyValuePair{Key: msg.Key, Value: val}
 			context.Respond(&messages.SearchResponse{Success: true, Entry: &keyValue})
 		} else {
 			context.Respond(&messages.SearchResponse{Success: false, Entry: nil})
 		}
 	case *messages.RemoveRequest:
-		if val, ok := (*node.values)[msg.Key]; ok {
+		if val, ok := (*n.values)[msg.Key]; ok {
 			removed := messages.KeyValuePair{Key: msg.Key, Value: val}
-			delete(*node.values, msg.Key)
+			delete(*n.values, msg.Key)
 			context.Respond(&messages.RemoveResponse{Success: true, RemovedPair: &removed})
 		} else {
 			context.Respond(&messages.RemoveResponse{Success: false, RemovedPair: nil})
 		}
 	case *messages.InsertRequest:
-		if len(*node.values) <= node.capacity {
-			(*node.values)[msg.Entry.Key] = msg.Entry.Value
+		if len(*n.values) <= n.capacity {
+			(*n.values)[msg.Entry.Key] = msg.Entry.Value
 			log.Printf("[Node] Inserted %d with %v", msg.Entry.Key, msg.Entry.Value)
 		} else {
 			// Sort key values pairs by keys
-			(*node.values)[msg.Entry.Key] = msg.Entry.Value
-			var pairs = make([]messages.KeyValuePair, 0, node.capacity+1)
+			(*n.values)[msg.Entry.Key] = msg.Entry.Value
+			var pairs = make([]messages.KeyValuePair, 0, n.capacity+1)
 
-			for k, v := range *node.values {
+			for k, v := range *n.values {
 				pairs = append(pairs, messages.KeyValuePair{
 					Key:   k,
 					Value: v,
@@ -80,10 +80,10 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			if !isEven {
 				midIndex++
 			}
-			node.searchkey = pairs[midIndex].Key
+			n.searchkey = pairs[midIndex].Key
 
-			leftValues := make(Storage, node.capacity+1)
-			rightValues := make(Storage, node.capacity+1)
+			leftValues := make(Storage, n.capacity+1)
+			rightValues := make(Storage, n.capacity+1)
 
 			for i := range pairs {
 				pair := pairs[i]
@@ -97,74 +97,74 @@ func (node *Node) LeafBehavior(context actor.Context) {
 
 			// Spawn both children
 			context.Spawn(actor.PropsFromProducer(func() actor.Actor {
-				return NewNode(node.capacity, &leftValues)
+				return NewNode(n.capacity, &leftValues)
 			}))
 			context.Spawn(actor.PropsFromProducer(func() actor.Actor {
-				return NewNode(node.capacity, &rightValues)
+				return NewNode(n.capacity, &rightValues)
 			}))
 
 			// Leaf is now a node
-			(*node).values = nil
-			node.behavior.Become(node.NodeBehavior)
+			(*n).values = nil
+			n.behavior.Become(n.NodeBehavior)
 			log.Printf("[Node] Leaf is now a node")
 		}
 		context.Respond(&messages.InsertResponse{Success: true})
 	case *messages.TraverseRequest:
-		var pairs = make([]*messages.KeyValuePair, 0, 3)
-		var keys = make([]int32, 0, 3)
+		var pairs = make([]*messages.KeyValuePair, 0, n.capacity)
 
-		for k := range *(node.values) {
-			keys = append(keys, k)
+		for k, v := range *(n.values) {
+			pairs = append(pairs, &messages.KeyValuePair{
+				Key:   k,
+				Value: v,
+			})
 		}
 
-		sort.Slice(keys, func(i, j int) bool {
-			return keys[i] < keys[j]
+		sort.Slice(pairs, func(i, j int) bool {
+			return pairs[i].Key < pairs[j].Key
 		})
 
-		for _, i := range keys {
-			pairs = append(pairs, &messages.KeyValuePair{Key: i, Value: (*node.values)[i]})
-		}
-
-		context.Respond(&messages.TraverseResponse{Pairs: pairs})
+		context.Respond(&messages.TraverseResponse{
+			Pairs: pairs,
+		})
 	}
 }
 
-func (node *Node) NodeBehavior(context actor.Context) {
+func (n *Node) NodeBehavior(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *messages.SearchRequest:
-		node.forwardKeyedMessage(context, msg.Key)
+		n.forwardKeyedMessage(context, msg.Key)
 
 	case *messages.InsertRequest:
 		var address *actor.PID
-		if node.searchkey < msg.Entry.Key {
+		if n.searchkey < msg.Entry.Key {
 			if len(context.Children()) > 1 {
 				address = context.Children()[1]
 			} else {
-				values := make(Storage, node.capacity+1)
+				values := make(Storage, n.capacity+1)
 				address = context.Spawn(actor.PropsFromProducer(func() actor.Actor {
-					return NewNode(node.capacity, &values)
+					return NewNode(n.capacity, &values)
 				}))
 			}
 		} else {
 			if len(context.Children()) > 0 {
 				address = context.Children()[0]
 			} else {
-				values := make(Storage, node.capacity+1)
+				values := make(Storage, n.capacity+1)
 				address = context.Spawn(actor.PropsFromProducer(func() actor.Actor {
-					return NewNode(node.capacity, &values)
+					return NewNode(n.capacity, &values)
 				}))
 			}
 		}
 		context.Forward(address)
 	case *messages.RemoveRequest:
-		node.forwardKeyedMessage(context, msg.Key)
+		n.forwardKeyedMessage(context, msg.Key)
 	case *messages.DeleteTreeRequest:
 		for _, child := range context.Children() {
 			context.Send(child, &messages.DeleteTreeRequest{})
 			child.Poison()
 		}
 	case *messages.TraverseRequest:
-		var pairs = make([]*messages.KeyValuePair, 0, node.capacity)
+		var pairs = make([]*messages.KeyValuePair, 0)
 		for _, child := range context.Children() {
 			result, _ := context.RequestFuture(child, &messages.TraverseRequest{}, TIMEOUT).Result()
 			response, err := result.(*messages.TraverseResponse)

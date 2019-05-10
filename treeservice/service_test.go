@@ -358,7 +358,7 @@ func TestService_TraverseKeyValuePairs(t *testing.T) {
 	}))
 
 	// First and foremost create a tree
-	treeId := createTree(t, rootContext, servicePID, 3)
+	treeId := createTree(t, rootContext, servicePID, 5)
 
 	// Then create some entries
 	count := 13
