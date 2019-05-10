@@ -61,14 +61,14 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			sb.WriteString(fmt.Sprintf("%d\n", id.Id))
 		}
 
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
 			Message:  sb.String(),
 			Original: msg,
 		})
 
 		a.behavior.Become(a.ExecuteState)
 	case *messages.CreateTreeResponse:
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
 			Message:  fmt.Sprintf("Created tree with ID: %d and Token: '%s'\n", msg.TreeId.Id, msg.TreeId.Token),
 			Original: msg,
 		})
@@ -87,7 +87,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Tree could not be deleted."
 		}
 
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
@@ -101,7 +101,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Insert did not work."
 		}
 
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
@@ -115,7 +115,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Could not find key-value pair."
 		}
 
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
@@ -129,7 +129,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Could not remove key-value pair."
 		}
 
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
@@ -152,7 +152,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Could not traverse tree."
 		}
 
-		ctx.Send(a.sender, local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
