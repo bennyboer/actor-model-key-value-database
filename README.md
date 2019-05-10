@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/ob-vss-ss19/blatt-3-sudo.svg?token=5Vr3hW38MWRTsVaHSMhn&branch=develop)](https://travis-ci.com/ob-vss-ss19/blatt-3-sudo)
+
 ## Benutzung
 
 > Vor dem Benutzen der Anwendung muss die Anwendung entweder mit Docker oder ohne Docker gebaut werden. 
