@@ -5,13 +5,13 @@ import (
 	"time"
 )
 
-type storage map[int32]string
+type Storage map[int32]string
 
 const TIMEOUT time.Duration = 1000
 
 type Node struct {
 	searchkey int32
-	values    *storage
+	values    *Storage
 	behavior  actor.Behavior
 	capacity  int
 }

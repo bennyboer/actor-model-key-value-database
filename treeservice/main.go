@@ -56,8 +56,9 @@ func (root *RootActor) rootBehavior(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *messages.CreateTreeRequest:
 		log.Printf("Create Tree Request incoming! %v\n", msg)
+		values := make(tree.Storage, msg.Capacity+1)
 		pid := ctx.Spawn(actor.PropsFromProducer(func() actor.Actor {
-			return tree.NewNode(int(msg.Capacity))
+			return tree.NewNode(int(msg.Capacity), &values)
 		}))
 		token := RandStringRunes(5)
 

@@ -8,21 +8,22 @@ import (
 	"sort"
 )
 
-func NewNode(capacity int) actor.Actor {
-	storage := make(storage, capacity+1)
+func NewNode(capacity int, values *Storage) actor.Actor {
 	act := &Node{
 		capacity:  capacity,
-		values:    &storage,
+		values:    values,
 		searchkey: math.MinInt32,
 		behavior:  actor.NewBehavior(),
 	}
+
 	act.behavior.Become(act.LeafBehavior)
+
 	return act
 }
 
-func (node *Node) forwardKeyedMessage(context actor.Context, key int32) {
+func (n *Node) forwardKeyedMessage(context actor.Context, key int32) {
 	var address *actor.PID = nil
-	if node.searchkey <= key {
+	if n.searchkey <= key {
 		if len(context.Children()) > 1 {
 			address = context.Children()[1]
 		}
@@ -58,39 +59,49 @@ func (node *Node) LeafBehavior(context actor.Context) {
 			(*node.values)[msg.Entry.Key] = msg.Entry.Value
 			log.Printf("[Node] Inserted %d with %v", msg.Entry.Key, msg.Entry.Value)
 		} else {
-			// Spawn both children
-			context.Spawn(actor.PropsFromProducer(func() actor.Actor {
-				return NewNode(node.capacity)
-			}))
-			context.Spawn(actor.PropsFromProducer(func() actor.Actor {
-				return NewNode(node.capacity)
-			}))
-
+			// Sort key values pairs by keys
 			(*node.values)[msg.Entry.Key] = msg.Entry.Value
-			var keys = make([]int32, 0, node.capacity+1)
+			var pairs = make([]messages.KeyValuePair, 0, node.capacity+1)
 
-			for k := range *node.values {
-				keys = append(keys, k)
+			for k, v := range *node.values {
+				pairs = append(pairs, messages.KeyValuePair{
+					Key:   k,
+					Value: v,
+				})
 			}
 
-			sort.Slice(keys, func(i, j int) bool {
-				return keys[i] < keys[j]
+			sort.Slice(pairs, func(i, j int) bool {
+				return pairs[i].Key < pairs[j].Key
 			})
-			midIndex := len(keys) / 2
-			isEven := len(keys)%2 == 0
+
+			// Split storage in two
+			midIndex := len(pairs) / 2
+			isEven := len(pairs)%2 == 0
 			if !isEven {
 				midIndex++
 			}
-			node.searchkey = keys[midIndex]
+			node.searchkey = pairs[midIndex].Key
 
-			for i, k := range keys {
-				var entry = messages.KeyValuePair{Key: k, Value: (*node.values)[k]}
-				var index = 0
-				if i > midIndex {
-					index = 1
+			leftValues := make(Storage, node.capacity+1)
+			rightValues := make(Storage, node.capacity+1)
+
+			for i := range pairs {
+				pair := pairs[i]
+
+				if i <= midIndex {
+					leftValues[pair.Key] = pair.Value
+				} else {
+					rightValues[pair.Key] = pair.Value
 				}
-				context.Send(context.Children()[index], &messages.InsertRequest{Entry: &entry, TreeId: msg.TreeId})
 			}
+
+			// Spawn both children
+			context.Spawn(actor.PropsFromProducer(func() actor.Actor {
+				return NewNode(node.capacity, &leftValues)
+			}))
+			context.Spawn(actor.PropsFromProducer(func() actor.Actor {
+				return NewNode(node.capacity, &rightValues)
+			}))
 
 			// Leaf is now a node
 			(*node).values = nil
@@ -129,16 +140,18 @@ func (node *Node) NodeBehavior(context actor.Context) {
 			if len(context.Children()) > 1 {
 				address = context.Children()[1]
 			} else {
+				values := make(Storage, node.capacity+1)
 				address = context.Spawn(actor.PropsFromProducer(func() actor.Actor {
-					return NewNode(node.capacity)
+					return NewNode(node.capacity, &values)
 				}))
 			}
 		} else {
 			if len(context.Children()) > 0 {
 				address = context.Children()[0]
 			} else {
+				values := make(Storage, node.capacity+1)
 				address = context.Spawn(actor.PropsFromProducer(func() actor.Actor {
-					return NewNode(node.capacity)
+					return NewNode(node.capacity, &values)
 				}))
 			}
 		}
