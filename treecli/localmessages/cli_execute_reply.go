@@ -1,4 +1,4 @@
-package local_messages
+package localmessages
 
 // Reply from the CLI actor.
 type CLIExecuteReply struct {

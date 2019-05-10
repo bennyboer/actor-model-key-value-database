@@ -18,7 +18,7 @@ func (DeleteTree) Identifier() string {
 func (DeleteTree) Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error {
 	log.Println("EXECUTE: Delete tree")
 
-	if flags.Id < 0 {
+	if flags.ID < 0 {
 		return errors.New("please supply a valid tree ID")
 	}
 	if len(flags.Token) == 0 {
@@ -27,7 +27,7 @@ func (DeleteTree) Execute(ctx actor.Context, flags *util.Flags, args []string, r
 
 	ctx.Request(remote, &messages.DeleteTreeRequest{
 		TreeId: &messages.TreeIdentifier{
-			Id:    int32(flags.Id),
+			Id:    int32(flags.ID),
 			Token: flags.Token,
 		},
 	})

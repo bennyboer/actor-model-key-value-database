@@ -21,7 +21,7 @@ func (Insert) Identifier() string {
 func (Insert) Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error {
 	log.Println("EXECUTE: Insert key-value pair")
 
-	if flags.Id < 0 {
+	if flags.ID < 0 {
 		return errors.New("please supply a valid tree ID")
 	}
 	if len(flags.Token) == 0 {
@@ -57,12 +57,12 @@ func (Insert) Execute(ctx actor.Context, flags *util.Flags, args []string, remot
 	log.Printf("Key: %d, Value: %s\n", key, value)
 
 	if ctx == nil {
-		return errors.New(fmt.Sprintf("the supplied context mustn't be nil"))
+		return fmt.Errorf("the supplied context mustn't be nil")
 	}
 
 	ctx.Request(remote, &messages.InsertRequest{
 		TreeId: &messages.TreeIdentifier{
-			Id:    int32(flags.Id),
+			Id:    int32(flags.ID),
 			Token: flags.Token,
 		},
 		Entry: &messages.KeyValuePair{

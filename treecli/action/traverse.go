@@ -18,7 +18,7 @@ func (Traverse) Identifier() string {
 func (Traverse) Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error {
 	log.Println("EXECUTE: Traverse tree")
 
-	if flags.Id < 0 {
+	if flags.ID < 0 {
 		return errors.New("please supply a valid tree ID")
 	}
 	if len(flags.Token) == 0 {
@@ -27,7 +27,7 @@ func (Traverse) Execute(ctx actor.Context, flags *util.Flags, args []string, rem
 
 	ctx.Request(remote, &messages.TraverseRequest{
 		TreeId: &messages.TreeIdentifier{
-			Id:    int32(flags.Id),
+			Id:    int32(flags.ID),
 			Token: flags.Token,
 		},
 	})

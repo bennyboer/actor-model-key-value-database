@@ -16,13 +16,22 @@ type Action interface {
 	Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error
 }
 
-// All available command line actions.
-var Actions = []Action{
-	&List{},
-	&CreateTree{},
-	&DeleteTree{},
-	&Insert{},
-	&Remove{},
-	&Search{},
-	&Traverse{},
+type Actions struct {
+	cachedActions []Action
+}
+
+func (a *Actions) Actions() []Action {
+	if a.cachedActions == nil {
+		a.cachedActions = []Action{
+			&List{},
+			&CreateTree{},
+			&DeleteTree{},
+			&Insert{},
+			&Remove{},
+			&Search{},
+			&Traverse{},
+		}
+	}
+
+	return a.cachedActions
 }

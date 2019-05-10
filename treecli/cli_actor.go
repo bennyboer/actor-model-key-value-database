@@ -5,7 +5,7 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/action"
-	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/local_messages"
+	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/localmessages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
 	"strings"
@@ -37,12 +37,12 @@ func (a *CLIActor) Receive(ctx actor.Context) {
 
 // State in which the CLI actor is awaiting a command execution request.
 func (a *CLIActor) ExecuteState(ctx actor.Context) {
-	switch msg := ctx.Message().(type) {
-	case *local_messages.CLIExecuteRequest:
-		log.Printf("Received CLI Execution Request: %v\n", msg)
+	req, ok := ctx.Message().(*localmessages.CLIExecuteRequest)
+	if ok {
+		log.Printf("Received CLI Execution Request: %v\n", req)
 
 		a.sender = ctx.Sender()
-		a.executeCommand(ctx, msg.Arguments, msg.Flags, msg.RemotePID)
+		a.executeCommand(ctx, req.Arguments, req.Flags, req.RemotePID)
 		a.behavior.Become(a.ReplyState)
 	}
 }
@@ -61,14 +61,14 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			sb.WriteString(fmt.Sprintf("%d\n", id.Id))
 		}
 
-		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &localmessages.CLIExecuteReply{
 			Message:  sb.String(),
 			Original: msg,
 		})
 
 		a.behavior.Become(a.ExecuteState)
 	case *messages.CreateTreeResponse:
-		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &localmessages.CLIExecuteReply{
 			Message:  fmt.Sprintf("Created tree with ID: %d and Token: '%s'\n", msg.TreeId.Id, msg.TreeId.Token),
 			Original: msg,
 		})
@@ -87,7 +87,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Tree could not be deleted."
 		}
 
-		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &localmessages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
@@ -101,7 +101,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Insert did not work."
 		}
 
-		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &localmessages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
@@ -115,7 +115,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Could not find key-value pair."
 		}
 
-		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &localmessages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
@@ -129,7 +129,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = "Could not remove key-value pair."
 		}
 
-		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &localmessages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
@@ -157,7 +157,7 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 			message = msg.ErrorMessage
 		}
 
-		ctx.Send(a.sender, &local_messages.CLIExecuteReply{
+		ctx.Send(a.sender, &localmessages.CLIExecuteReply{
 			Message:  message,
 			Original: msg,
 		})
@@ -170,7 +170,8 @@ func (a *CLIActor) ReplyState(ctx actor.Context) {
 func (a *CLIActor) executeCommand(ctx actor.Context, arguments []string, flags *util.Flags, remotePID *actor.PID) {
 	// Create mapping of argument name to action.
 	actionMap := make(map[string]action.Action)
-	for _, a := range action.Actions {
+	actions := action.Actions{}
+	for _, a := range actions.Actions() {
 		actionMap[a.Identifier()] = a
 	}
 

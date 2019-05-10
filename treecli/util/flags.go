@@ -21,23 +21,23 @@ const (
 
 // Flags the CLI is able to understand.
 type Flags struct {
-	// Token of the tree service session
-	Token string
-
 	// Id of the tree to work with
-	Id int
-
-	// Name to bind the CLI to
-	Name string
+	ID int
 
 	// Port to bind the CLI to
 	Port uint16
 
-	// Name of the remote service to connect to
-	RemoteName string
-
 	// Port of the remove service to connect to
 	RemotePort uint16
+
+	// Token of the tree service session
+	Token string
+
+	// Name to bind the CLI to
+	Name string
+
+	// Name of the remote service to connect to
+	RemoteName string
 
 	// Name of the remote service actor
 	RemoteActorName string
@@ -97,7 +97,7 @@ func GetProgramFlags() *Flags {
 
 	return &Flags{
 		Token:           *token,
-		Id:              *id,
+		ID:              *id,
 		Name:            name,
 		Port:            port,
 		RemoteName:      remoteName,
@@ -119,12 +119,12 @@ func parseNamePort(srcPtr *string) (string, uint16, error) {
 
 	port, e := strconv.ParseUint(parts[1], 10, 16)
 	if e != nil {
-		return "", 0, errors.New(fmt.Sprintf("could not parse port %s", parts[1]))
+		return "", 0, fmt.Errorf("could not parse port %s", parts[1])
 	}
 
 	return parts[0], uint16(port), nil
 }
 
 func (f *Flags) String() string {
-	return fmt.Sprintf("{ token: %s, id: %v }", f.Token, f.Id)
+	return fmt.Sprintf("{ token: %s, id: %v }", f.Token, f.ID)
 }

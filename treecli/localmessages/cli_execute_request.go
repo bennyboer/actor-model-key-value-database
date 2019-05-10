@@ -1,4 +1,4 @@
-package local_messages
+package localmessages
 
 import (
 	"fmt"

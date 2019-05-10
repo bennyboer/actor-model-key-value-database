@@ -6,7 +6,7 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/remote"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/action"
-	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/local_messages"
+	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/localmessages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"log"
 )
@@ -23,7 +23,7 @@ func main() {
 			log.Fatalf("Command execution failed:\n%s\n", err.Error())
 		}
 
-		response, ok := result.(*local_messages.CLIExecuteReply)
+		response, ok := result.(*localmessages.CLIExecuteReply)
 		if !ok {
 			log.Fatalf("Answer of the CLI Actor is incorrect")
 		}
@@ -47,7 +47,7 @@ func process(arguments []string, flags *util.Flags) *actor.Future {
 
 	future := rootContext.RequestFuture(
 		cliActor,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     flags,
 			RemotePID: remotePID,
@@ -60,7 +60,8 @@ func process(arguments []string, flags *util.Flags) *actor.Future {
 
 func printHelp() {
 	fmt.Println("Actions:")
-	for _, a := range action.Actions {
+	actions := action.Actions{}
+	for _, a := range actions.Actions() {
 		fmt.Printf("- %s\n", a.Identifier())
 	}
 

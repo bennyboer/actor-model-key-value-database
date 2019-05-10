@@ -5,7 +5,7 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	act "github.com/ob-vss-ss19/blatt-3-sudo/treecli/action"
-	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/local_messages"
+	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/localmessages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/treecli/util"
 	"testing"
 	"time"
@@ -59,7 +59,7 @@ func TestCLIActor_ExecuteState_ListTrees(t *testing.T) {
 
 	future := rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -72,7 +72,7 @@ func TestCLIActor_ExecuteState_ListTrees(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(*local_messages.CLIExecuteReply)
+	response, ok := result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -139,7 +139,7 @@ func TestCLIActor_ExecuteState_CreateTree(t *testing.T) {
 
 	future := rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -152,7 +152,7 @@ func TestCLIActor_ExecuteState_CreateTree(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(*local_messages.CLIExecuteReply)
+	response, ok := result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -177,7 +177,7 @@ func TestCLIActor_ExecuteState_CreateTree(t *testing.T) {
 func TestCLIActor_ExecuteState_DeleteTree_InvalidInput(t *testing.T) {
 	arguments := []string{}[:]
 	flags := util.Flags{
-		Id: -1,
+		ID: -1,
 	}
 
 	action := act.DeleteTree{}
@@ -186,7 +186,7 @@ func TestCLIActor_ExecuteState_DeleteTree_InvalidInput(t *testing.T) {
 		t.Errorf("expected to throw error because of negative tree id")
 	}
 
-	flags.Id = 123
+	flags.ID = 123
 
 	err = action.Execute(nil, &flags, arguments, nil)
 	if err == nil {
@@ -200,7 +200,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 	}
 	flags := util.Flags{
 		Timeout: time.Second * 5,
-		Id:      123,
+		ID:      123,
 		Token:   "abc123",
 	}
 
@@ -250,7 +250,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 
 	future := rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -263,7 +263,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(*local_messages.CLIExecuteReply)
+	response, ok := result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -286,7 +286,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 	// Try second deletion call to delete the tree forever.
 	future = rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -299,7 +299,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 		t.Errorf("expected no error; got %s\n", err.Error())
 	}
 
-	response, ok = result.(*local_messages.CLIExecuteReply)
+	response, ok = result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -320,10 +320,10 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 	}
 
 	// Try again, but now with an invalid tree id
-	flags.Id = 324
+	flags.ID = 324
 	future = rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -336,7 +336,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 		t.Errorf("expected no error; got %s\n", err.Error())
 	}
 
-	response, ok = result.(*local_messages.CLIExecuteReply)
+	response, ok = result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -360,7 +360,7 @@ func TestCLIActor_ExecuteState_DeleteTree(t *testing.T) {
 func TestCLIActor_ExecuteState_Insert_ValidateInput(t *testing.T) {
 	arguments := []string{}[:]
 	flags := util.Flags{
-		Id: -1,
+		ID: -1,
 	}
 
 	// Test negative tree id
@@ -371,7 +371,7 @@ func TestCLIActor_ExecuteState_Insert_ValidateInput(t *testing.T) {
 	}
 
 	// Test empty token
-	flags.Id = 1
+	flags.ID = 1
 	err = action.Execute(nil, &flags, arguments, nil)
 	if err == nil {
 		t.Errorf("expected action to throw an error because of an empty token")
@@ -424,7 +424,7 @@ func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 	}
 	flags := util.Flags{
 		Timeout: time.Second * 5,
-		Id:      123,
+		ID:      123,
 		Token:   "abc123",
 	}
 
@@ -461,7 +461,7 @@ func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 
 	future := rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -474,7 +474,7 @@ func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(*local_messages.CLIExecuteReply)
+	response, ok := result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -495,10 +495,10 @@ func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 	}
 
 	// Try again, but if invalid tree id
-	flags.Id = 5435
+	flags.ID = 5435
 	future = rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -511,7 +511,7 @@ func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok = result.(*local_messages.CLIExecuteReply)
+	response, ok = result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -535,7 +535,7 @@ func TestCLIActor_ExecuteState_Insert(t *testing.T) {
 func TestCLIActor_ExecuteState_Remove_ValidateInputs(t *testing.T) {
 	arguments := []string{}[:]
 	flags := util.Flags{
-		Id: -1,
+		ID: -1,
 	}
 
 	action := act.Remove{}
@@ -547,7 +547,7 @@ func TestCLIActor_ExecuteState_Remove_ValidateInputs(t *testing.T) {
 	}
 
 	// Test empty token
-	flags.Id = 123
+	flags.ID = 123
 	err = action.Execute(nil, &flags, arguments, nil)
 	if err == nil {
 		t.Errorf("expected error because of empty tree token")
@@ -585,7 +585,7 @@ func TestCLIActor_ExecuteState_Remove(t *testing.T) {
 		"434",
 	}
 	flags := util.Flags{
-		Id:      123,
+		ID:      123,
 		Token:   "abc123",
 		Timeout: time.Second * 5,
 	}
@@ -627,7 +627,7 @@ func TestCLIActor_ExecuteState_Remove(t *testing.T) {
 
 	future := rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -640,7 +640,7 @@ func TestCLIActor_ExecuteState_Remove(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(*local_messages.CLIExecuteReply)
+	response, ok := result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -672,7 +672,7 @@ func TestCLIActor_ExecuteState_Remove(t *testing.T) {
 
 	future = rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -685,7 +685,7 @@ func TestCLIActor_ExecuteState_Remove(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok = result.(*local_messages.CLIExecuteReply)
+	response, ok = result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -716,7 +716,7 @@ func TestCLIActor_ExecuteState_Search(t *testing.T) {
 		"345",
 	}
 	flags := util.Flags{
-		Id:      123,
+		ID:      123,
 		Token:   "abc123",
 		Timeout: time.Second * 5,
 	}
@@ -758,7 +758,7 @@ func TestCLIActor_ExecuteState_Search(t *testing.T) {
 
 	future := rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -771,7 +771,7 @@ func TestCLIActor_ExecuteState_Search(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(*local_messages.CLIExecuteReply)
+	response, ok := result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -803,7 +803,7 @@ func TestCLIActor_ExecuteState_Search(t *testing.T) {
 
 	future = rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -816,7 +816,7 @@ func TestCLIActor_ExecuteState_Search(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok = result.(*local_messages.CLIExecuteReply)
+	response, ok = result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -844,7 +844,7 @@ func TestCLIActor_ExecuteState_Search(t *testing.T) {
 func TestCLIActor_ExecuteState_Search_ValidateInputs(t *testing.T) {
 	arguments := []string{}[:]
 	flags := util.Flags{
-		Id: -1,
+		ID: -1,
 	}
 
 	action := act.Search{}
@@ -856,7 +856,7 @@ func TestCLIActor_ExecuteState_Search_ValidateInputs(t *testing.T) {
 	}
 
 	// Test empty token
-	flags.Id = 123
+	flags.ID = 123
 	err = action.Execute(nil, &flags, arguments, nil)
 	if err == nil {
 		t.Errorf("expected error because of empty tree token")
@@ -893,7 +893,7 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 		"traverse",
 	}
 	flags := util.Flags{
-		Id:      124,
+		ID:      124,
 		Token:   "abc123",
 		Timeout: time.Second * 5,
 	}
@@ -943,7 +943,7 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 
 	future := rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -956,7 +956,7 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok := result.(*local_messages.CLIExecuteReply)
+	response, ok := result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -981,11 +981,11 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 	}
 
 	// Test successful traverse
-	flags.Id = 123
+	flags.ID = 123
 
 	future = rootContext.RequestFuture(
 		cliPID,
-		&local_messages.CLIExecuteRequest{
+		&localmessages.CLIExecuteRequest{
 			Arguments: arguments,
 			Flags:     &flags,
 			RemotePID: servicePID,
@@ -998,7 +998,7 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 		t.Errorf("expected no error")
 	}
 
-	response, ok = result.(*local_messages.CLIExecuteReply)
+	response, ok = result.(*localmessages.CLIExecuteReply)
 	if !ok {
 		t.Errorf("expected response to be of type CLIExecuteReply")
 	}
@@ -1034,7 +1034,7 @@ func TestCLIActor_ExecuteState_Traverse(t *testing.T) {
 func TestCLIActor_ExecuteState_Traverse_ValidateInputs(t *testing.T) {
 	arguments := []string{}[:]
 	flags := util.Flags{
-		Id: -1,
+		ID: -1,
 	}
 
 	action := act.Traverse{}
@@ -1046,7 +1046,7 @@ func TestCLIActor_ExecuteState_Traverse_ValidateInputs(t *testing.T) {
 	}
 
 	// Test empty token
-	flags.Id = 123
+	flags.ID = 123
 	err = action.Execute(nil, &flags, arguments, nil)
 	if err == nil {
 		t.Errorf("expected error because of empty tree token")

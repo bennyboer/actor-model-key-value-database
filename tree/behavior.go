@@ -24,7 +24,7 @@ func NewNode(capacity int, values *Storage) actor.Actor {
 }
 
 func (n *Node) forwardKeyedMessage(context actor.Context, key int32) error {
-	var address *actor.PID = nil
+	var address *actor.PID
 
 	if key <= n.searchkey {
 		if len(context.Children()) > 0 {
@@ -130,7 +130,7 @@ func (n *Node) LeafBehavior(context actor.Context) {
 			}))
 
 			// Leaf is now a node
-			(*n).values = nil
+			n.values = nil
 			n.behavior.Become(n.NodeBehavior)
 			log.Printf("[Node] Leaf is now a node")
 		}
