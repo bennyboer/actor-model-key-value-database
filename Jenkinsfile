@@ -7,12 +7,8 @@ pipeline {
             }
             steps {
                 sh '''
-                    ls
-                    cd messages
-                    ls
-                    cd ..
-                    git status
                     go version
+                    go env
                     cd build
                     chmod +x ./install_protoc.sh
                     . ./install_protoc.sh

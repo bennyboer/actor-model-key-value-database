@@ -1,7 +1,6 @@
 #!/bin/sh
 
 echo "Fetching dependencies"
-go clean
 go install github.com/gogo/protobuf/protoc-gen-gogoslick
 go get
 
