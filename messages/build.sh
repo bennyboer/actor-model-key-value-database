@@ -1,6 +1,6 @@
 #!/bin/sh
 
-protoc -I=. -I=${GOPATH}/pkg --gogoslick_out=plugins=grpc:. \
+protoc -I=. --gogoslick_out=plugins=grpc:. \
     list_trees.proto \
     create_tree.proto \
     delete_tree.proto \
