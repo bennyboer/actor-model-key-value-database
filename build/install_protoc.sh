@@ -8,4 +8,4 @@ bin/protoc --version
 
 # Add to path
 PROTOC_BINARY_PATH=$(realpath bin/protoc)
-PATH=${PATH}:${PROTOC_BINARY_PATH}
+export PATH=${PATH}:${PROTOC_BINARY_PATH}
