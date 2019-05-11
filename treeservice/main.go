@@ -4,13 +4,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/AsynkronIT/goconsole"
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/remote"
 	"github.com/ob-vss-ss19/blatt-3-sudo/messages"
 	"github.com/ob-vss-ss19/blatt-3-sudo/tree"
 	"log"
 	"math/rand"
+	"os"
+	"os/signal"
 	"time"
 )
 
@@ -209,8 +210,13 @@ func main() {
 		log.Fatalf("Could not create root actor")
 	}
 
-	_, _ = console.ReadLine() // Wait for console input to terminate the application
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<-c
+	log.Println("Terminating...")
+
 	serverPID.GracefulPoison()
+	log.Println("Terminated. Bye!")
 }
 
 func printHeader() {
