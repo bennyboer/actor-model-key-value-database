@@ -10,6 +10,7 @@ import (
 	"sort"
 )
 
+// Creates a new node. Producer function.
 func NewNode(capacity int, values *Storage) actor.Actor {
 	act := &Node{
 		capacity:  capacity,
@@ -23,6 +24,7 @@ func NewNode(capacity int, values *Storage) actor.Actor {
 	return act
 }
 
+// Utility function to forward a message to the indented child.
 func (n *Node) forwardKeyedMessage(context actor.Context, key int32) error {
 	var address *actor.PID
 
@@ -49,6 +51,7 @@ func (n *Node) forwardKeyedMessage(context actor.Context, key int32) error {
 	return nil
 }
 
+// Behavior for leafs. Stores values and can become a node if its storage capacity is full.
 func (n *Node) LeafBehavior(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *messages.SearchRequest:
@@ -163,6 +166,7 @@ func (n *Node) LeafBehavior(context actor.Context) {
 	}
 }
 
+// Behavior for the node. Acts as a parent to two leafs and forwards indented messages.
 func (n *Node) NodeBehavior(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *messages.SearchRequest:

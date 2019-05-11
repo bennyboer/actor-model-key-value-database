@@ -1,3 +1,4 @@
+// The main package provides the cli interface to communicate with the treeservice.
 package main
 
 import (
@@ -58,6 +59,7 @@ func process(arguments []string, flags *util.Flags) *actor.Future {
 	return future
 }
 
+// Outputs the help message.
 func printHelp() {
 	fmt.Println("Actions:")
 	actions := action.Actions{}
