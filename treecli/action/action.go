@@ -1,3 +1,4 @@
+// The action package provides all actions the cli can execute.
 package action
 
 import (
@@ -16,10 +17,12 @@ type Action interface {
 	Execute(ctx actor.Context, flags *util.Flags, args []string, remote *actor.PID) error
 }
 
+// Type, that represents cached actions, which need to be executed.
 type Actions struct {
 	cachedActions []Action
 }
 
+// Returns the cached actions.
 func (a *Actions) Actions() []Action {
 	if a.cachedActions == nil {
 		a.cachedActions = []Action{

@@ -1,3 +1,4 @@
+// The package main contains the main components of the treeservice.
 package main
 
 import (
@@ -17,6 +18,7 @@ import (
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
+// Generates a random String out of given runes with length n.
 func RandStringRunes(n int) string {
 	letterRunes := []rune(letters)
 
@@ -28,19 +30,22 @@ func RandStringRunes(n int) string {
 	return string(b)
 }
 
+// Struct which contains data for a tree.
 type TreeData struct {
-	pid    *actor.PID
-	token  string
-	marked bool
+	pid    *actor.PID // The Pid of the tree
+	token  string     // The trees token
+	marked bool       // If the tree is marked for deletion
 }
 
+// Type which contains data necessary for the root actor in the treeservice.
 type RootActor struct {
-	idToData map[int32]TreeData
-	trees    []int32
-	lastIns  int32
-	behavior actor.Behavior
+	idToData map[int32]TreeData // Maps the tree id to its data.
+	trees    []int32            // List of all trees for this RootActor
+	lastIns  int32              // What the index of the last inserted tree was, for id generation.
+	behavior actor.Behavior     // The behavior of the RootActor
 }
 
+// Returns a new RootActor. Producer function.
 func newRoot() *RootActor {
 	a := &RootActor{
 		idToData: make(map[int32]TreeData),
@@ -52,10 +57,12 @@ func newRoot() *RootActor {
 	return a
 }
 
+// Implementation of the actor interface.
 func (root *RootActor) Receive(ctx actor.Context) {
 	root.behavior.Receive(ctx)
 }
 
+// How the root behaves.
 func (root *RootActor) rootBehavior(ctx actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case *messages.CreateTreeRequest:

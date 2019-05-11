@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// Const that defines the default values for the cli.
 const (
 	defaultName                   = ""
 	defaultPort            uint16 = 8091

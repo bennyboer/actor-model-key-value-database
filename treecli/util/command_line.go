@@ -1,3 +1,4 @@
+// The util package provides utility functions for the cli interface.
 package util
 
 import (

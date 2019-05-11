@@ -1,3 +1,4 @@
+// The package localmessages provides the messages used locally in the cli.
 package localmessages
 
 // Reply from the CLI actor.
